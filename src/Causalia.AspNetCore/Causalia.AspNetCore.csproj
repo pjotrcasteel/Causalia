@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Causalia.AspNetCore</AssemblyName>
+    <RootNamespace>Causalia.AspNetCore</RootNamespace>
+    <PackageId>Causalia.AspNetCore</PackageId>
+    <Description>Deterministic ASP.NET Core hosting and service-to-service HTTP network simulation for Causalia.</Description>
+    <PackageTags>testing;deterministic;simulation;aspnetcore;http;network;fault-injection;partitions;distributed-systems</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../Causalia/Causalia.csproj" />
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <InternalsVisibleTo Include="Causalia.AspNetCore.Tests" />
+  </ItemGroup>
+</Project>

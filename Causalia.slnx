@@ -1,0 +1,33 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Causalia/Causalia.csproj" />
+    <Project Path="src/Causalia.Analyzers/Causalia.Analyzers.csproj" />
+    <Project Path="src/Causalia.Testing/Causalia.Testing.csproj" />
+    <Project Path="src/Causalia.Reqnroll/Causalia.Reqnroll.csproj" />
+    <Project Path="src/Causalia.AspNetCore/Causalia.AspNetCore.csproj" />
+    <Project Path="src/Causalia.Storage/Causalia.Storage.csproj" />
+    <Project Path="src/Causalia.EntityFrameworkCore/Causalia.EntityFrameworkCore.csproj" />
+    <Project Path="src/Causalia.Visualization/Causalia.Visualization.csproj" />
+    <Project Path="src/Causalia.Load/Causalia.Load.csproj" />
+    <Project Path="src/Causalia.Dapr/Causalia.Dapr.csproj" />
+    <Project Path="src/Causalia.Kafka/Causalia.Kafka.csproj" />
+    <Project Path="src/Causalia.RabbitMQ/Causalia.RabbitMQ.csproj" />
+    <Project Path="src/Causalia.Grpc/Causalia.Grpc.csproj" />
+  </Folder>
+  <Folder Name="/examples/">
+    <Project Path="examples/Causalia.ExampleApp/Causalia.ExampleApp.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Causalia.Examples.Tests/Causalia.Examples.Tests.csproj" />
+    <Project Path="tests/Causalia.Tests/Causalia.Tests.csproj" />
+    <Project Path="tests/Causalia.Analyzers.Tests/Causalia.Analyzers.Tests.csproj" />
+    <Project Path="tests/Causalia.Testing.Tests/Causalia.Testing.Tests.csproj" />
+    <Project Path="tests/Causalia.Reqnroll.Tests/Causalia.Reqnroll.Tests.csproj" />
+    <Project Path="tests/Causalia.AspNetCore.Tests/Causalia.AspNetCore.Tests.csproj" />
+    <Project Path="tests/Causalia.Storage.Tests/Causalia.Storage.Tests.csproj" />
+    <Project Path="tests/Causalia.EntityFrameworkCore.Tests/Causalia.EntityFrameworkCore.Tests.csproj" />
+    <Project Path="tests/Causalia.Visualization.Tests/Causalia.Visualization.Tests.csproj" />
+    <Project Path="tests/Causalia.Load.Tests/Causalia.Load.Tests.csproj" />
+    <Project Path="tests/Causalia.Ecosystem.Tests/Causalia.Ecosystem.Tests.csproj" />
+  </Folder>
+</Solution>

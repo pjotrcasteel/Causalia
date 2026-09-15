@@ -1,0 +1,19 @@
+## Release 2.0.0
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+CAU1001 | Causalia.Determinism | Warning | Use Causalia virtual time
+CAU1002 | Causalia.Determinism | Warning | Use Causalia deterministic randomness
+CAU1003 | Causalia.Determinism | Warning | Avoid uncontrolled concurrency
+CAU1004 | Causalia.Determinism | Warning | Avoid blocking waits in deterministic simulation code
+CAU1005 | Causalia.Determinism | Warning | Mark scenario method for deterministic analysis
+
+## Release 2.0.1
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+CAU1006 | Causalia.Determinism | Warning | Keep awaits on the deterministic scheduler

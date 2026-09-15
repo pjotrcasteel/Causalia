@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Causalia.Visualization</AssemblyName>
+    <RootNamespace>Causalia.Visualization</RootNamespace>
+    <PackageId>Causalia.Visualization</PackageId>
+    <Description>Self-contained deterministic trace visualization and debugging for Causalia.</Description>
+    <PackageTags>testing;deterministic;simulation;trace;visualization;debugging;distributed-systems</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Causalia/Causalia.csproj" />
+    <EmbeddedResource Include="TraceViewerTemplate.html" />
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <InternalsVisibleTo Include="Causalia.Visualization.Tests" />
+  </ItemGroup>
+</Project>

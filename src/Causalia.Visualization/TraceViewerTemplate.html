@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0b0d12;
+  --panel: #121620;
+  --panel-2: #171c28;
+  --text: #e8ecf3;
+  --muted: #8f9bad;
+  --line: #2a3243;
+  --info: #7db7ff;
+  --success: #79d69a;
+  --warning: #f4c86a;
+  --error: #ff7d8b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  padding: 18px 22px 14px;
+  background: rgba(11, 13, 18, .96);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(12px);
+}
+h1 { margin: 0 0 4px; font-size: 22px; letter-spacing: -.02em; }
+.subtitle { color: var(--muted); }
+main { padding: 18px 22px 48px; }
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+.card .value { margin-top: 3px; font-size: 18px; font-weight: 650; overflow-wrap: anywhere; }
+.failure { border-color: rgba(255, 125, 139, .55); }
+.failure .value { color: var(--error); }
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(140px, 220px));
+  gap: 8px;
+  margin: 12px 0;
+}
+input, select, button {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  padding: 9px 10px;
+  font: inherit;
+}
+button { cursor: pointer; width: auto; }
+button:hover { background: var(--panel-2); }
+.replay {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.replay code {
+  min-width: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted);
+}
+.timeline {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--panel);
+}
+.row {
+  display: grid;
+  grid-template-columns: 92px 88px 150px 118px minmax(240px, 1fr);
+  min-height: 41px;
+  border-bottom: 1px solid rgba(42, 50, 67, .7);
+  align-items: stretch;
+}
+.row:last-child { border-bottom: 0; }
+.row:hover { background: var(--panel-2); }
+.cell { padding: 10px 11px; min-width: 0; }
+.time, .step, .lane { color: var(--muted); font-variant-numeric: tabular-nums; }
+.lane { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.category { font-size: 12px; font-weight: 650; text-transform: uppercase; letter-spacing: .05em; }
+.message { overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 7px;
+}
+.Information .dot { background: var(--info); }
+.Success .dot { background: var(--success); }
+.Warning .dot { background: var(--warning); }
+.Error .dot { background: var(--error); }
+.Error .message { color: #ffc1c8; }
+.Warning .message { color: #ffe3a6; }
+.correlation {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+}
+.empty { padding: 30px; text-align: center; color: var(--muted); }
+.notice { margin: 10px 0; color: var(--warning); }
+.debugger {
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+.debugger-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+.debugger-controls select { flex: 1; }
+.debugger-meta { color: var(--muted); margin-bottom: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.debugger-state { display: grid; gap: 6px; }
+.debugger-probe {
+  display: grid;
+  grid-template-columns: minmax(140px, 240px) minmax(220px, 1fr);
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid rgba(42, 50, 67, .7);
+  border-radius: 8px;
+}
+.debugger-name { color: var(--muted); }
+.debugger-value { white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+@media (max-width: 900px) {
+  .toolbar { grid-template-columns: 1fr 1fr; }
+  .row { grid-template-columns: 78px 62px 110px minmax(210px, 1fr); }
+  .category { display: none; }
+}
+@media (max-width: 620px) {
+  main, header { padding-left: 12px; padding-right: 12px; }
+  .toolbar { grid-template-columns: 1fr; }
+  .row { grid-template-columns: 72px 54px minmax(180px, 1fr); }
+  .lane { display: none; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>{{TITLE}}</h1>
+  <div class="subtitle">Deterministic causal timeline · generated by Causalia.Visualization</div>
+</header>
+<main>
+  <section id="cards" class="cards"></section>
+  <section class="replay">
+    <code id="replay"></code>
+    <button id="copyReplay" type="button">Copy replay token</button>
+  </section>
+  <div id="truncated" class="notice" hidden>This export was truncated by MaxEvents.</div>
+  <section id="timeTravelPanel" class="debugger" hidden>
+    <div class="debugger-controls">
+      <button id="timeTravelPrevious" type="button">Previous</button>
+      <select id="timeTravelCheckpoint"></select>
+      <button id="timeTravelNext" type="button">Next</button>
+    </div>
+    <div id="timeTravelMeta" class="debugger-meta"></div>
+    <div id="timeTravelState" class="debugger-state"></div>
+  </section>
+  <section class="toolbar">
+    <input id="search" type="search" placeholder="Search message or correlation id…">
+    <select id="category"><option value="">All categories</option></select>
+    <select id="lane"><option value="">All lanes</option></select>
+    <select id="severity"><option value="">All severities</option></select>
+  </section>
+  <section id="timeline" class="timeline"></section>
+</main>
+<script>
+const trace = {{TRACE_JSON}};
+const showSchedulerInitially = {{SHOW_SCHEDULER}};
+const cards = document.getElementById("cards");
+const timeline = document.getElementById("timeline");
+const search = document.getElementById("search");
+const category = document.getElementById("category");
+const lane = document.getElementById("lane");
+const severity = document.getElementById("severity");
+const replay = document.getElementById("replay");
+const copyReplay = document.getElementById("copyReplay");
+const truncated = document.getElementById("truncated");
+const timeTravelPanel = document.getElementById("timeTravelPanel");
+const timeTravelPrevious = document.getElementById("timeTravelPrevious");
+const timeTravelNext = document.getElementById("timeTravelNext");
+const timeTravelCheckpoint = document.getElementById("timeTravelCheckpoint");
+const timeTravelMeta = document.getElementById("timeTravelMeta");
+const timeTravelState = document.getElementById("timeTravelState");
+
+function card(label, value, failure) {
+  const element = document.createElement("div");
+  element.className = failure ? "card failure" : "card";
+  const labelElement = document.createElement("div");
+  labelElement.className = "label";
+  labelElement.textContent = label;
+  const valueElement = document.createElement("div");
+  valueElement.className = "value";
+  valueElement.textContent = value;
+  element.append(labelElement, valueElement);
+  cards.appendChild(element);
+}
+
+function ticksToText(value) {
+  const milliseconds = value / 10000;
+  if (milliseconds < 1) return `${Math.round(value / 10)}µs`;
+  if (milliseconds < 1000) return `${milliseconds.toFixed(2)}ms`;
+  const seconds = milliseconds / 1000;
+  if (seconds < 60) return `${seconds.toFixed(3)}s`;
+  const minutes = seconds / 60;
+  if (minutes < 60) return `${minutes.toFixed(2)}m`;
+  const hours = minutes / 60;
+  if (hours < 24) return `${hours.toFixed(2)}h`;
+  return `${(hours / 24).toFixed(2)}d`;
+}
+
+function addOptions(select, values) {
+  for (const value of [...new Set(values)].sort()) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    select.appendChild(option);
+  }
+}
+
+function matches(event) {
+  const query = search.value.trim().toLowerCase();
+  if (!showSchedulerInitially && !category.value && event.category === "Scheduler") return false;
+  if (category.value && event.category !== category.value) return false;
+  if (lane.value && event.lane !== lane.value) return false;
+  if (severity.value && event.severity !== severity.value) return false;
+  if (!query) return true;
+  return event.message.toLowerCase().includes(query)
+    || (event.correlationId || "").toLowerCase().includes(query)
+    || event.lane.toLowerCase().includes(query);
+}
+
+function renderTimeTravel() {
+  const checkpoints = trace.timeTravel || [];
+  if (checkpoints.length === 0) {
+    timeTravelPanel.hidden = true;
+    return;
+  }
+
+  timeTravelPanel.hidden = false;
+  const index = Math.max(0, Math.min(Number(timeTravelCheckpoint.value || 0), checkpoints.length - 1));
+  const checkpoint = checkpoints[index];
+  timeTravelCheckpoint.value = String(index);
+  timeTravelPrevious.disabled = index === 0;
+  timeTravelNext.disabled = index === checkpoints.length - 1;
+  const label = checkpoint.label ? ` · ${checkpoint.label}` : "";
+  timeTravelMeta.textContent = `${checkpoint.token} · step ${checkpoint.step} · ${checkpoint.kind}${label} · trace events ${checkpoint.traceCount}`;
+  timeTravelState.textContent = "";
+
+  if (!checkpoint.state || checkpoint.state.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "No state probes were registered for this checkpoint.";
+    timeTravelState.appendChild(empty);
+    return;
+  }
+
+  for (const probe of checkpoint.state) {
+    const row = document.createElement("div");
+    row.className = "debugger-probe";
+    const name = document.createElement("div");
+    name.className = "debugger-name";
+    name.textContent = probe.name;
+    const value = document.createElement("div");
+    value.className = "debugger-value";
+    value.textContent = probe.succeeded ? (probe.value ?? "<null>") : `${probe.errorType}: ${probe.errorMessage || ""}`;
+    row.append(name, value);
+    timeTravelState.appendChild(row);
+  }
+}
+
+function initializeTimeTravel() {
+  const checkpoints = trace.timeTravel || [];
+  if (checkpoints.length === 0) return;
+
+  for (let index = 0; index < checkpoints.length; index++) {
+    const checkpoint = checkpoints[index];
+    const option = document.createElement("option");
+    option.value = String(index);
+    option.textContent = `${checkpoint.token} · #${checkpoint.step} · ${checkpoint.kind}${checkpoint.label ? ` · ${checkpoint.label}` : ""}`;
+    timeTravelCheckpoint.appendChild(option);
+  }
+
+  timeTravelCheckpoint.value = String(checkpoints.length - 1);
+  timeTravelCheckpoint.addEventListener("change", renderTimeTravel);
+  timeTravelPrevious.addEventListener("click", () => {
+    timeTravelCheckpoint.value = String(Math.max(0, Number(timeTravelCheckpoint.value) - 1));
+    renderTimeTravel();
+  });
+  timeTravelNext.addEventListener("click", () => {
+    timeTravelCheckpoint.value = String(Math.min(checkpoints.length - 1, Number(timeTravelCheckpoint.value) + 1));
+    renderTimeTravel();
+  });
+  renderTimeTravel();
+}
+
+function render() {
+  timeline.textContent = "";
+  const visible = trace.events.filter(matches);
+  if (visible.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "No trace events match the current filters.";
+    timeline.appendChild(empty);
+    return;
+  }
+
+  for (const event of visible) {
+    const row = document.createElement("div");
+    row.className = `row ${event.severity}`;
+    row.title = event.timestamp;
+    const time = document.createElement("div");
+    time.className = "cell time";
+    time.textContent = `+${ticksToText(event.elapsedTicks)}`;
+    const step = document.createElement("div");
+    step.className = "cell step";
+    step.textContent = `#${event.step}`;
+    const laneElement = document.createElement("div");
+    laneElement.className = "cell lane";
+    laneElement.textContent = event.lane;
+    const categoryElement = document.createElement("div");
+    categoryElement.className = "cell category";
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    categoryElement.append(dot, document.createTextNode(event.category));
+    const message = document.createElement("div");
+    message.className = "cell message";
+    message.textContent = event.message;
+    if (event.correlationId) {
+      const correlation = document.createElement("span");
+      correlation.className = "correlation";
+      correlation.textContent = event.correlationId;
+      correlation.title = "Click to filter this causal chain";
+      correlation.addEventListener("click", () => {
+        search.value = event.correlationId;
+        render();
+      });
+      message.appendChild(correlation);
+    }
+    row.append(time, step, laneElement, categoryElement, message);
+    timeline.appendChild(row);
+  }
+}
+
+const summary = trace.summary;
+card("Seed", String(summary.seed), false);
+card("Steps", String(summary.steps), false);
+card("Virtual time", ticksToText(summary.virtualElapsedTicks), false);
+card("Events", String(summary.eventCount), false);
+card("Faults", String(summary.faultCount), false);
+if (summary.productionRealityApplicationCount) card("Reality evidence", String(summary.productionRealityApplicationCount), false);
+if (summary.timeTravelCheckpointCount) card("Checkpoints", String(summary.timeTravelCheckpointCount), false);
+if (summary.droppedTimeTravelCheckpointCount) card("Dropped checkpoints", String(summary.droppedTimeTravelCheckpointCount), false);
+if (summary.failureType) card("Failure", `${summary.failureType}: ${summary.failureMessage || ""}`, true);
+if (summary.failureKind) card("Failure kind", summary.failureKind, true);
+if (summary.failureSignature) card("Signature", summary.failureSignature, true);
+if (summary.failureTrigger) card("Trigger", summary.failureTrigger, true);
+if (summary.failureConfidence) card("Analysis", summary.failureConfidence, false);
+if (summary.reproductionToken) card("Minimized reproduction", summary.reproductionToken, false);
+replay.textContent = summary.replayToken;
+truncated.hidden = !trace.truncated;
+addOptions(category, trace.events.map(event => event.category));
+addOptions(lane, trace.lanes.map(value => value.name));
+addOptions(severity, trace.events.map(event => event.severity));
+for (const element of [search, category, lane, severity]) {
+  element.addEventListener("input", render);
+  element.addEventListener("change", render);
+}
+initializeTimeTravel();
+copyReplay.addEventListener("click", async () => {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    await navigator.clipboard.writeText(summary.replayToken);
+  } else {
+    window.prompt("Replay token", summary.replayToken);
+  }
+  copyReplay.textContent = "Copied";
+  setTimeout(() => copyReplay.textContent = "Copy replay token", 1200);
+});
+render();
+</script>
+</body>
+</html>

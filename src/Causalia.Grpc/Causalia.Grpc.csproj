@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Causalia.Grpc</AssemblyName>
+    <RootNamespace>Causalia.Grpc</RootNamespace>
+    <PackageId>Causalia.Grpc</PackageId>
+    <Description>Deterministic gRPC unary-call, deadline and retry simulation for Causalia.</Description>
+    <PackageTags>testing;deterministic;simulation;grpc;rpc;deadline;retry;distributed-systems</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Causalia/Causalia.csproj" />
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

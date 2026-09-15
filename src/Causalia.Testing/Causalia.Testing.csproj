@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Causalia.Testing</AssemblyName>
+    <RootNamespace>Causalia.Testing</RootNamespace>
+    <PackageId>Causalia.Testing</PackageId>
+    <Description>Framework-agnostic test-provider abstractions for Causalia deterministic simulations.</Description>
+    <PackageTags>testing;deterministic;simulation;provider</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <ProjectReference Include="../Causalia/Causalia.csproj" />
+  </ItemGroup>
+</Project>
