@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Causalia.Reqnroll</AssemblyName>
+    <RootNamespace>Causalia.Reqnroll</RootNamespace>
+    <PackageId>Causalia.Reqnroll</PackageId>
+    <Description>Scenario-scoped Causalia provider designed for Reqnroll constructor context injection.</Description>
+    <PackageTags>testing;deterministic;simulation;reqnroll;bdd;gherkin</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/README.md" />
+    <ProjectReference Include="../Causalia.Testing/Causalia.Testing.csproj" />
+  </ItemGroup>
+</Project>

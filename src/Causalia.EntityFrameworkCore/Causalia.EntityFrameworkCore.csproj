@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Causalia.EntityFrameworkCore</AssemblyName>
+    <RootNamespace>Causalia.EntityFrameworkCore</RootNamespace>
+    <PackageId>Causalia.EntityFrameworkCore</PackageId>
+    <Description>Entity Framework Core commit-boundary simulation adapter for Causalia.</Description>
+    <PackageTags>testing;deterministic;simulation;entity-framework-core;ef-core;database;fault-injection</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Causalia/Causalia.csproj" />
+    <ProjectReference Include="../Causalia.Storage/Causalia.Storage.csproj" />
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>
+</Project>

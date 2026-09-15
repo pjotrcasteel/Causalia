@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="MSTest.TestAdapter" />
+    <PackageReference Include="MSTest.TestFramework" />
+    <ProjectReference Include="../../src/Causalia/Causalia.csproj" />
+    <ProjectReference Include="../../src/Causalia.Dapr/Causalia.Dapr.csproj" />
+    <ProjectReference Include="../../src/Causalia.Kafka/Causalia.Kafka.csproj" />
+    <ProjectReference Include="../../src/Causalia.RabbitMQ/Causalia.RabbitMQ.csproj" />
+    <ProjectReference Include="../../src/Causalia.Grpc/Causalia.Grpc.csproj" />
+  </ItemGroup>
+</Project>

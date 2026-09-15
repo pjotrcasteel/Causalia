@@ -1,0 +1,30 @@
+<Project>
+  <PropertyGroup>
+    <Version>2.0.1</Version>
+    <PackageReleaseNotes>Causalia 2.0.1 hardens deterministic execution, lifecycle handling, evidence fingerprints, analyzers and release validation.</PackageReleaseNotes>
+    <Authors>Causalia contributors</Authors>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <Deterministic>true</Deterministic>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl
+      Condition="'$(RepositoryUrl)' == '' and '$(GITHUB_SERVER_URL)' != '' and '$(GITHUB_REPOSITORY)' != ''">
+      $(GITHUB_SERVER_URL)/$(GITHUB_REPOSITORY)
+    </RepositoryUrl>
+    <PublishRepositoryUrl Condition="'$(RepositoryUrl)' != ''">true</PublishRepositoryUrl>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <WarningsAsErrors>$(WarningsAsErrors);NU1901;NU1902;NU1903;NU1904</WarningsAsErrors>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+</Project>

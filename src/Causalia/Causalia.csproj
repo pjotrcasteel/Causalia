@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Causalia</AssemblyName>
+    <RootNamespace>Causalia</RootNamespace>
+    <PackageId>Causalia</PackageId>
+    <Description>Deterministic simulation testing for concurrent and distributed .NET software.</Description>
+    <PackageTags>
+      testing;deterministic;simulation;concurrency;distributed-systems;schedule-exploration;model-based-testing;
+      state-machine-testing;invariants;consistency;causal-consistency;eventual-consistency;minimization;linearizability;
+      property-testing;determinism;time-travel-debugging;state-debugging;verification-platform;ci-verification
+    </PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <InternalsVisibleTo Include="Causalia.Tests" />
+    <InternalsVisibleTo Include="Causalia.AspNetCore" />
+    <InternalsVisibleTo Include="Causalia.Storage" />
+  </ItemGroup>
+</Project>

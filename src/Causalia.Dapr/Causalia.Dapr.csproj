@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Causalia.Dapr</AssemblyName>
+    <RootNamespace>Causalia.Dapr</RootNamespace>
+    <PackageId>Causalia.Dapr</PackageId>
+    <Description>Deterministic Dapr building-block simulation for Causalia.</Description>
+    <PackageTags>testing;deterministic;simulation;dapr;pubsub;state;service-invocation;distributed-systems</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Causalia/Causalia.csproj" />
+    <ProjectReference Include="../Causalia.Storage/Causalia.Storage.csproj" />
+    <ProjectReference Include="../Causalia.AspNetCore/Causalia.AspNetCore.csproj" />
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

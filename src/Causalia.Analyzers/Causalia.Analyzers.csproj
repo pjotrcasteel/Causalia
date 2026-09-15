@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Causalia.Analyzers</AssemblyName>
+    <RootNamespace>Causalia.Analyzers</RootNamespace>
+    <PackageId>Causalia.Analyzers</PackageId>
+    <Description>Roslyn analyzers that protect deterministic Causalia simulation boundaries.</Description>
+    <PackageTags>testing;deterministic;simulation;roslyn;analyzer;concurrency</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeSymbols>false</IncludeSymbols>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet" Visible="false" />
+  </ItemGroup>
+  <Target Name="PrepareAnalyzerReleaseTracking" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <AnalyzerReleaseDirectory>$(IntermediateOutputPath)analyzer-releases/</AnalyzerReleaseDirectory>
+    </PropertyGroup>
+    <MakeDir Directories="$(AnalyzerReleaseDirectory)" />
+    <Copy SourceFiles="AnalyzerReleases.Shipped.txt" DestinationFiles="$(AnalyzerReleaseDirectory)AnalyzerReleases.Shipped.md" />
+    <Copy SourceFiles="AnalyzerReleases.Unshipped.txt" DestinationFiles="$(AnalyzerReleaseDirectory)AnalyzerReleases.Unshipped.md" />
+    <ItemGroup>
+      <AdditionalFiles Include="$(AnalyzerReleaseDirectory)AnalyzerReleases.*.md" />
+      <FileWrites Include="$(AnalyzerReleaseDirectory)AnalyzerReleases.*.md" />
+    </ItemGroup>
+  </Target>
+</Project>
