@@ -1,7 +1,7 @@
 using Causalia.FailureIntelligence;
 using Causalia.Faults;
-using Causalia.Scheduling;
 using Causalia.ModelBased;
+using Causalia.Scheduling;
 using Causalia.Tracing;
 
 namespace Causalia.Exceptions;
@@ -15,10 +15,7 @@ public sealed class SimulationExplorationFailedException : Exception
         ExplorationStrategy strategy,
         int schedulesExplored,
         SimulationFailedException failure)
-        : base(
-            $"{strategy} exploration found a failure after {schedulesExplored} schedule(s). " +
-            $"Replay token: {failure.Schedule.ReplayToken}",
-            failure)
+        : base(CreateMessage(strategy, schedulesExplored, failure), failure)
     {
         Strategy = strategy;
         SchedulesExplored = schedulesExplored;
@@ -75,6 +72,7 @@ public sealed class SimulationExplorationFailedException : Exception
     /// Gets the model-based verification failure when exploration stopped because an executable model command failed.
     /// </summary>
     public SimulationModelViolationException? ModelFailure { get; }
+
     /// <summary>
     /// Gets the stable semantic signature of the discovered failure.
     /// </summary>
@@ -85,4 +83,11 @@ public sealed class SimulationExplorationFailedException : Exception
     /// </summary>
     public FailureKind Kind => Failure.Kind;
 
+    private static string CreateMessage(
+        ExplorationStrategy strategy,
+        int schedulesExplored,
+        SimulationFailedException failure)
+    {
+        return $"{strategy} exploration found a failure after {schedulesExplored} schedule(s).{Environment.NewLine}{failure.Message}";
+    }
 }

@@ -2,6 +2,8 @@ namespace Causalia.Kafka;
 
 internal sealed class KafkaConsumerGroupState
 {
+    public long Generation { get; set; }
+
     public required string GroupId { get; init; }
 
     public Dictionary<string, KafkaGroupMemberState> Members { get; } = new(StringComparer.Ordinal);

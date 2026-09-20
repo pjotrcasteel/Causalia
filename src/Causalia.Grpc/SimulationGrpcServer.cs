@@ -8,9 +8,11 @@ namespace Causalia.Grpc;
 public sealed class SimulationGrpcServer
 {
     private readonly Dictionary<(string Service, string Method), GrpcMethodRegistration> _methods = new();
+    private readonly SimulationContext _context;
 
-    internal SimulationGrpcServer(string name, SimulationNode? node)
+    internal SimulationGrpcServer(SimulationContext context, string name, SimulationNode? node)
     {
+        _context = context;
         Name = name;
         Node = node;
     }
@@ -29,6 +31,11 @@ public sealed class SimulationGrpcServer
     /// Gets whether the server is currently available.
     /// </summary>
     public bool IsAvailable => Node?.IsRunning ?? true;
+
+    internal bool BelongsTo(SimulationContext context)
+    {
+        return ReferenceEquals(_context, context);
+    }
 
     /// <summary>
     /// Registers one typed unary method.

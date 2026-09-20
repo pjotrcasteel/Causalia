@@ -17,8 +17,10 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../SCENARIOS.md" Pack="true" PackagePath="/" />
     <InternalsVisibleTo Include="Causalia.Tests" />
     <InternalsVisibleTo Include="Causalia.AspNetCore" />
     <InternalsVisibleTo Include="Causalia.Storage" />
+    <InternalsVisibleTo Include="Causalia.Grpc" />
   </ItemGroup>
 </Project>

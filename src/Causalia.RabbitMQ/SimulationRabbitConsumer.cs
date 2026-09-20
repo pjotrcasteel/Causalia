@@ -46,6 +46,8 @@ public sealed class SimulationRabbitConsumer : IAsyncDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
         await Task.Yield();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (PrefetchCount > 0 && _unacked.Count >= PrefetchCount)
         {

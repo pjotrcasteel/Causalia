@@ -26,7 +26,13 @@ public sealed class SimulationGrpcNetwork
     public SimulationGrpcServer CreateServer(string name, SimulationNode? node = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        return new SimulationGrpcServer(name, node);
+
+        if (node is not null && !node.BelongsTo(_context))
+        {
+            throw new ArgumentException("The gRPC server node belongs to a different simulation context.", nameof(node));
+        }
+
+        return new SimulationGrpcServer(_context, name, node);
     }
 
     /// <summary>
@@ -36,6 +42,11 @@ public sealed class SimulationGrpcNetwork
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(serviceName);
         ArgumentNullException.ThrowIfNull(server);
+
+        if (!server.BelongsTo(_context))
+        {
+            throw new ArgumentException("The gRPC server belongs to a different simulation context.", nameof(server));
+        }
 
         if (!_servers.TryAdd(serviceName, server))
         {
@@ -78,6 +89,7 @@ public sealed class SimulationGrpcNetwork
         CancellationToken cancellationToken)
     {
         Validate(options);
+        cancellationToken.ThrowIfCancellationRequested();
         var callId = checked(++_nextCallId);
         _context.TraceEvent(
             $"grpc:call:started:{callId}:{call.Source}->{call.Destination}:{call.Service}/{call.Method}");
@@ -88,9 +100,12 @@ public sealed class SimulationGrpcNetwork
         {
             for (var attempt = 1; attempt <= options.MaxAttempts; attempt++)
             {
+                callToken.ThrowIfCancellationRequested();
+
                 try
                 {
-                    var result = await InvokeAttemptAsync<TRequest, TResponse>(callId, attempt, call, callToken);
+                    var operation = InvokeAttemptAsync<TRequest, TResponse>(callId, attempt, call, callToken);
+                    var result = await AwaitResponseAsync(operation, callId, callToken);
                     _context.TraceEvent($"grpc:call:completed:{callId}:attempt:{attempt}:status:Ok");
                     return result;
                 }
@@ -117,12 +132,46 @@ public sealed class SimulationGrpcNetwork
         throw new SimulationGrpcException(SimulationGrpcStatusCode.Unknown, "gRPC retry loop exhausted unexpectedly.");
     }
 
+    private async Task<TResponse> AwaitResponseAsync<TResponse>(Task<TResponse> operation, long callId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await operation.WaitAsync(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            return result;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The client stops waiting independently of the server. Keep late server effects under simulation control.
+            _context.TrackOperation(ObserveAbandonedCallAsync(operation, callId));
+            throw;
+        }
+    }
+
+    private async Task ObserveAbandonedCallAsync(Task operation, long callId)
+    {
+        try
+        {
+            await operation;
+            _context.TraceEvent($"grpc:call:server-completed-after-cancellation:{callId}");
+        }
+        catch (OperationCanceledException)
+        {
+            _context.TraceEvent($"grpc:call:server-cancelled:{callId}");
+        }
+        catch (Exception exception)
+        {
+            _context.TraceEvent($"grpc:call:server-failed-after-cancellation:{callId}:{exception.GetType().Name}");
+        }
+    }
+
     private async Task<TResponse> InvokeAttemptAsync<TRequest, TResponse>(
         long callId,
         int attempt,
         GrpcUnaryCall<TRequest> call,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var server = Resolve(call.Destination);
         var link = Between(call.Source, call.Destination);
 
@@ -164,6 +213,15 @@ public sealed class SimulationGrpcNetwork
         {
             _context.TraceEvent($"grpc:call:delayed:{callId}:attempt:{attempt}:{delay.Ticks}");
             await Task.Delay(delay, _context.TimeProvider, cancellationToken);
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (link.IsPartitioned || !server.IsAvailable)
+        {
+            throw new SimulationGrpcException(
+                SimulationGrpcStatusCode.Unavailable,
+                $"gRPC destination '{call.Destination}' became unavailable before dispatch.");
         }
 
         _context.TraceEvent($"grpc:call:dispatched:{callId}:attempt:{attempt}:{call.Destination}");

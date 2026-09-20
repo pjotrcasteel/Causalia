@@ -9,6 +9,7 @@ public sealed class SimulationGrpcNetworkLink
 {
     private readonly FaultInjector<GrpcCallContext, GrpcNetworkFault>? _faults;
     private readonly SimulationContext _context;
+    private TimeSpan _latency;
 
     internal SimulationGrpcNetworkLink(SimulationContext context, string source, string destination, GrpcFaultPlan? faults)
     {
@@ -25,7 +26,19 @@ public sealed class SimulationGrpcNetworkLink
     public string Destination { get; }
 
     /// <summary>Gets or sets fixed virtual latency for every attempt.</summary>
-    public TimeSpan Latency { get; set; }
+    public TimeSpan Latency
+    {
+        get => _latency;
+        set
+        {
+            if (value < TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, "Latency cannot be negative.");
+            }
+
+            _latency = value;
+        }
+    }
 
     /// <summary>Gets whether this directed link is partitioned.</summary>
     public bool IsPartitioned { get; private set; }

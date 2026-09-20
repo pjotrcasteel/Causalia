@@ -14,5 +14,6 @@
   <ItemGroup>
     <ProjectReference Include="../Causalia/Causalia.csproj" />
     <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../SCENARIOS.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 </Project>

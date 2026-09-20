@@ -92,6 +92,7 @@ public sealed class SimulationKafkaCluster
         cancellationToken.ThrowIfCancellationRequested();
         var state = GetTopic(topic);
         await Task.Yield();
+        cancellationToken.ThrowIfCancellationRequested();
         var partition = SelectPartition(state, key);
         var log = state.Partitions[partition];
         var offset = log.Count;
@@ -131,8 +132,11 @@ public sealed class SimulationKafkaCluster
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        var group = GetGroup(groupId);
+        var member = GetMember(group, memberId);
         await Task.Yield();
-        var member = GetMember(GetGroup(groupId), memberId);
+        cancellationToken.ThrowIfCancellationRequested();
+        RequireActiveMember(group, member);
 
         foreach (var partition in member.Assignment.OrderBy(value => value.Topic, StringComparer.Ordinal).ThenBy(value => value.Partition))
         {
@@ -169,10 +173,13 @@ public sealed class SimulationKafkaCluster
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        await Task.Yield();
         var group = GetGroup(groupId);
         var member = GetMember(group, memberId);
+        var generation = group.Generation;
         RequireOwnership(member, partition);
+        await Task.Yield();
+        cancellationToken.ThrowIfCancellationRequested();
+        RequireCommitOwnership(group, member, generation, partition);
         var faultContext = new KafkaCommitFaultContext
         {
             GroupId = groupId,
@@ -201,6 +208,8 @@ public sealed class SimulationKafkaCluster
             }
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+        RequireCommitOwnership(group, member, generation, partition);
         group.CommittedOffsets[partition] = offset;
         Trace($"kafka:offset:committed:{Name}:{groupId}:{memberId}:{partition.Topic}:{partition.Partition}:{offset}");
 
@@ -219,10 +228,14 @@ public sealed class SimulationKafkaCluster
 
         foreach (var stored in member.StoredOffsets.ToList())
         {
+            RequireActiveMember(group, member);
             await CommitAsync(groupId, memberId, stored.Key, stored.Value, cancellationToken);
-        }
 
-        member.StoredOffsets.Clear();
+            if (member.StoredOffsets.TryGetValue(stored.Key, out var currentOffset) && currentOffset == stored.Value)
+            {
+                member.StoredOffsets.Remove(stored.Key);
+            }
+        }
     }
 
     internal void Leave(string groupId, string memberId)
@@ -240,6 +253,7 @@ public sealed class SimulationKafkaCluster
 
     private void Rebalance(KafkaConsumerGroupState group)
     {
+        group.Generation = checked(group.Generation + 1);
         foreach (var member in group.Members.Values)
         {
             member.Assignment.Clear();
@@ -297,6 +311,26 @@ public sealed class SimulationKafkaCluster
         {
             throw new SimulationKafkaPartitionOwnershipException(member.MemberId, partition);
         }
+    }
+
+    private static void RequireActiveMember(KafkaConsumerGroupState group, KafkaGroupMemberState member)
+    {
+        if (!group.Members.TryGetValue(member.MemberId, out var current) || !ReferenceEquals(member, current))
+        {
+            throw new ObjectDisposedException(nameof(SimulationKafkaConsumer));
+        }
+    }
+
+    private static void RequireCommitOwnership(KafkaConsumerGroupState group, KafkaGroupMemberState member, long generation, KafkaTopicPartition partition)
+    {
+        if (group.Generation != generation
+            || !group.Members.TryGetValue(member.MemberId, out var current)
+            || !ReferenceEquals(member, current))
+        {
+            throw new SimulationKafkaPartitionOwnershipException(member.MemberId, partition);
+        }
+
+        RequireOwnership(member, partition);
     }
 
     private int SelectPartition(KafkaTopicState topic, string? key)

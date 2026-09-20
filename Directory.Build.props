@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
-    <Version>2.0.1</Version>
-    <PackageReleaseNotes>Causalia 2.0.1 hardens deterministic execution, lifecycle handling, evidence fingerprints, analyzers and release validation.</PackageReleaseNotes>
+    <Version>2.1.1</Version>
+    <PackageReleaseNotes>Causalia 2.1.1 adds adoption tooling and fixes solution updates, generated-project isolation, release verification, gRPC deadlines, broker lifecycle races, storage version reuse, transaction reentrancy, and invalid virtual timers.</PackageReleaseNotes>
     <Authors>Causalia contributors</Authors>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>

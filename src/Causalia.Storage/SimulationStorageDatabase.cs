@@ -10,6 +10,7 @@ namespace Causalia.Storage;
 public sealed class SimulationStorageDatabase
 {
     private readonly Dictionary<string, StoredValue> _values = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, long> _lastVersions = new(StringComparer.Ordinal);
     private readonly SimulationContext _context;
 
     internal SimulationStorageDatabase(SimulationContext context, string name)
@@ -51,7 +52,9 @@ public sealed class SimulationStorageDatabase
     {
         var actualVersion = _values.TryGetValue(key, out var existing) ? existing.Version : 0;
         ValidateExpectedVersion(key, expectedVersion, actualVersion);
-        _values[key] = new StoredValue(value.ToArray(), checked(actualVersion + 1));
+        var nextVersion = GetNextVersion(key);
+        _values[key] = new StoredValue(value.ToArray(), nextVersion);
+        _lastVersions[key] = nextVersion;
     }
 
     internal bool Delete(string key, long? expectedVersion)
@@ -64,23 +67,34 @@ public sealed class SimulationStorageDatabase
 
     internal void Commit(IReadOnlyDictionary<string, StagedStorageChange> changes)
     {
+        var prepared = new Dictionary<string, StoredValue?>(StringComparer.Ordinal);
+
         foreach (var change in changes)
         {
             var actualVersion = _values.TryGetValue(change.Key, out var existing) ? existing.Version : 0;
             ValidateExpectedVersion(change.Key, change.Value.ExpectedVersion, actualVersion);
+            prepared.Add(change.Key, change.Value.Value is null
+                ? null
+                : new StoredValue(change.Value.Value.ToArray(), GetNextVersion(change.Key)));
         }
 
-        foreach (var change in changes)
+        foreach (var change in prepared)
         {
-            if (change.Value.Value is null)
+            if (change.Value is null)
             {
                 _values.Remove(change.Key);
                 continue;
             }
 
-            var actualVersion = _values.TryGetValue(change.Key, out var existing) ? existing.Version : 0;
-            _values[change.Key] = new StoredValue(change.Value.Value.ToArray(), checked(actualVersion + 1));
+            _values[change.Key] = change.Value;
+            _lastVersions[change.Key] = change.Value.Version;
         }
+    }
+
+    private long GetNextVersion(string key)
+    {
+        // Retain the previous revision across deletion so a stale CAS/ETag cannot match a recreated key.
+        return checked(_lastVersions.GetValueOrDefault(key) + 1);
     }
 
     private static void ValidateExpectedVersion(string key, long? expectedVersion, long actualVersion)

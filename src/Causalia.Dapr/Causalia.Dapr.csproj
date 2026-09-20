@@ -16,5 +16,6 @@
     <ProjectReference Include="../Causalia.Storage/Causalia.Storage.csproj" />
     <ProjectReference Include="../Causalia.AspNetCore/Causalia.AspNetCore.csproj" />
     <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../SCENARIOS.md" Pack="true" PackagePath="/SCENARIOS.md" />
   </ItemGroup>
 </Project>

@@ -15,6 +15,7 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../Causalia/Causalia.csproj" />
     <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../SCENARIOS.md" Pack="true" PackagePath="/" />
     <InternalsVisibleTo Include="Causalia.AspNetCore.Tests" />
   </ItemGroup>
 </Project>

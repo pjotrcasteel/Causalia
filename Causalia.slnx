@@ -13,6 +13,7 @@
     <Project Path="src/Causalia.Kafka/Causalia.Kafka.csproj" />
     <Project Path="src/Causalia.RabbitMQ/Causalia.RabbitMQ.csproj" />
     <Project Path="src/Causalia.Grpc/Causalia.Grpc.csproj" />
+    <Project Path="src/Causalia.Tool/Causalia.Tool.csproj" />
   </Folder>
   <Folder Name="/examples/">
     <Project Path="examples/Causalia.ExampleApp/Causalia.ExampleApp.csproj" />
@@ -29,5 +30,6 @@
     <Project Path="tests/Causalia.Visualization.Tests/Causalia.Visualization.Tests.csproj" />
     <Project Path="tests/Causalia.Load.Tests/Causalia.Load.Tests.csproj" />
     <Project Path="tests/Causalia.Ecosystem.Tests/Causalia.Ecosystem.Tests.csproj" />
+    <Project Path="tests/Causalia.Tool.Tests/Causalia.Tool.Tests.csproj" />
   </Folder>
 </Solution>

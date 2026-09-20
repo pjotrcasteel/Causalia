@@ -17,3 +17,11 @@ CAU1005 | Causalia.Determinism | Warning | Mark scenario method for deterministi
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 CAU1006 | Causalia.Determinism | Warning | Keep awaits on the deterministic scheduler
+
+## Release 2.1.1
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+CAU1007 | Causalia.Determinism | Warning | Propagate simulation cancellation

@@ -15,6 +15,7 @@
     <ProjectReference Include="../Causalia/Causalia.csproj" />
     <EmbeddedResource Include="TraceViewerTemplate.html" />
     <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../SCENARIOS.md" Pack="true" PackagePath="/" />
     <InternalsVisibleTo Include="Causalia.Visualization.Tests" />
   </ItemGroup>
 </Project>

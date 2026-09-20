@@ -1,12 +1,12 @@
 using Causalia.Consistency;
 using Causalia.FailureIntelligence;
 using Causalia.Faults;
-using Causalia.Scheduling;
 using Causalia.Linearizability;
 using Causalia.ModelBased;
 using Causalia.ProductionReality;
-using Causalia.Tracing;
+using Causalia.Scheduling;
 using Causalia.TimeTravel;
+using Causalia.Tracing;
 
 namespace Causalia.Exceptions;
 
@@ -16,9 +16,7 @@ namespace Causalia.Exceptions;
 public sealed class SimulationFailedException : Exception
 {
     internal SimulationFailedException(SimulationFailureData data, Exception innerException)
-        : base(
-            $"Simulation failed with seed {data.Seed}. Replay token: {data.Schedule.ReplayToken}",
-            innerException)
+        : base(SimulationFailureMessageFormatter.Format(data, innerException), innerException)
     {
         ArgumentNullException.ThrowIfNull(data);
         Seed = data.Seed;

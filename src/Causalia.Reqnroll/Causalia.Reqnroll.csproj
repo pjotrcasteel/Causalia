@@ -13,6 +13,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="/README.md" />
+    <None Include="../../SCENARIOS.md" Pack="true" PackagePath="/SCENARIOS.md" />
     <ProjectReference Include="../Causalia.Testing/Causalia.Testing.csproj" />
   </ItemGroup>
 </Project>

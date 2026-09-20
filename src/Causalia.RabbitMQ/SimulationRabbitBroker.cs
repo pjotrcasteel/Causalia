@@ -79,6 +79,7 @@ public sealed class SimulationRabbitBroker
     {
         cancellationToken.ThrowIfCancellationRequested();
         await Task.Yield();
+        cancellationToken.ThrowIfCancellationRequested();
         var exchangeState = GetExchange(exchange);
         var messageId = checked(++_nextMessageId);
         var faultContext = new RabbitPublishFaultContext
@@ -108,6 +109,7 @@ public sealed class SimulationRabbitBroker
             }
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
         var matching = exchangeState.Bindings.Where(binding => Matches(exchangeState.Type, binding, routingKey))
             .Select(binding => binding.Queue)
             .Distinct(StringComparer.Ordinal)

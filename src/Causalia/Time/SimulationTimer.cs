@@ -79,7 +79,7 @@ internal sealed class SimulationTimer : ITimer
 
     private static void ValidateTimeout(TimeSpan timeout, string parameterName)
     {
-        if (timeout < Timeout.InfiniteTimeSpan)
+        if (timeout < TimeSpan.Zero && timeout != Timeout.InfiniteTimeSpan)
         {
             throw new ArgumentOutOfRangeException(parameterName);
         }

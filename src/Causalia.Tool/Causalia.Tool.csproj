@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Causalia.Tool</AssemblyName>
+    <RootNamespace>Causalia.Tool</RootNamespace>
+    <PackageId>Causalia.Tool</PackageId>
+    <Description>Adoption tooling for inspecting existing .NET solutions and generating the first deterministic Causalia simulation project.</Description>
+    <PackageTags>causalia;testing;deterministic;simulation;inspection;init;adoption;dotnet-tool</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>dotnet-causalia</ToolCommandName>
+    <IncludeSymbols>false</IncludeSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../SCENARIOS.md" Pack="true" PackagePath="/" />
+    <InternalsVisibleTo Include="Causalia.Tool.Tests" />
+  </ItemGroup>
+</Project>

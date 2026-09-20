@@ -11,6 +11,7 @@ public sealed class SimulationStorageTransaction
     private readonly SimulationStorageDatabase _database;
     private readonly Dictionary<string, StagedStorageChange> _changes = new(StringComparer.Ordinal);
     private bool _completed;
+    private bool _commitInProgress;
 
     internal SimulationStorageTransaction(SimulationStorageDatabase database, SimulationStorageBoundary boundary)
     {
@@ -44,20 +45,29 @@ public sealed class SimulationStorageTransaction
     public async Task CommitAsync(CancellationToken cancellationToken)
     {
         ThrowIfCompleted();
-        var lease = await _boundary.BeginAsync(StorageOperationKind.Commit, null, cancellationToken);
+        _commitInProgress = true;
 
         try
         {
-            _database.Commit(_changes);
-            _completed = true;
-        }
-        catch (Exception exception)
-        {
-            _boundary.ProviderFailed(lease, exception);
-            throw;
-        }
+            var lease = await _boundary.BeginAsync(StorageOperationKind.Commit, null, cancellationToken);
 
-        await _boundary.CompleteAsync(lease, cancellationToken);
+            try
+            {
+                _database.Commit(_changes);
+                _completed = true;
+            }
+            catch (Exception exception)
+            {
+                _boundary.ProviderFailed(lease, exception);
+                throw;
+            }
+
+            await _boundary.CompleteAsync(lease, cancellationToken);
+        }
+        finally
+        {
+            _commitInProgress = false;
+        }
     }
 
     /// <summary>
@@ -75,6 +85,11 @@ public sealed class SimulationStorageTransaction
         if (_completed)
         {
             throw new InvalidOperationException("The storage transaction has already completed.");
+        }
+
+        if (_commitInProgress)
+        {
+            throw new InvalidOperationException("The storage transaction is already committing.");
         }
     }
 }
