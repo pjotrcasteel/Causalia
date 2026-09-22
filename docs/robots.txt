@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pjotrcasteel.github.io/Causalia/sitemap.xml
