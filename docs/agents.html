@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Causalia for AI coding agents — deterministic evidence for the agent loop</title>
+  <meta name="description" content="Use Causalia to give AI coding agents a deterministic inspect, reproduce, patch and replay loop for timing, retry, restart and concurrency failures in .NET.">
+  <meta name="theme-color" content="#090d13">
+  <link rel="canonical" href="https://pjotrcasteel.github.io/Causalia/agents.html">
+  <link rel="icon" href="./logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="nav-shell">
+    <nav class="nav container">
+      <a class="brand" href="./"><img src="./logo.svg" alt="" width="30" height="30"><span>Causalia</span></a>
+      <div class="nav-links"><a href="./#lab">Failure Lab</a><a href="./business-value.html">Business value</a><a href="./llms.txt">llms.txt</a><a href="https://github.com/pjotrcasteel/Causalia">GitHub</a></div>
+      <a class="button button-small" href="https://www.nuget.org/packages/Causalia">NuGet</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-hero container">
+      <div class="eyebrow">Causalia for AI coding agents</div>
+      <h1>Make the agent loop<br><span>less probabilistic.</span></h1>
+      <p class="hero-lead">AI agents can inspect code, edit files and run tests. Causalia adds something especially useful for distributed-system debugging: a failure execution that can be replayed after the agent changes the code.</p>
+      <div class="hero-actions"><a class="button" href="#workflow">Use the workflow</a><a class="button button-ghost" href="./llms.txt">Open llms.txt</a></div>
+    </section>
+
+    <section class="section container narrow-content">
+      <div class="section-heading">
+        <div class="eyebrow">Why this matters</div>
+        <h2>A stable signal is better than a lucky green test.</h2>
+        <p>If the same test can pass or fail because wall-clock timing changed, an agent has weak evidence for whether its patch worked. A deterministic replay makes the validation target stable.</p>
+      </div>
+      <div class="value-cards">
+        <article class="value-card"><span>01</span><h3>Machine-readable discovery</h3><p><code>dotnet causalia inspect ... --format json</code> gives an agent structured leads about likely simulation boundaries and determinism seams.</p></article>
+        <article class="value-card"><span>02</span><h3>Replayable evidence</h3><p>A replay token and reduced failure sequence let the agent test the same problematic execution before and after a change.</p></article>
+        <article class="value-card"><span>03</span><h3>Broader verification</h3><p>After the exact reproduction passes, the agent can run wider deterministic exploration plus the repository's ordinary tests.</p></article>
+      </div>
+    </section>
+
+    <section id="workflow" class="section lab-section">
+      <div class="container narrow-content">
+        <div class="section-heading">
+          <div class="eyebrow">Recommended agent workflow</div>
+          <h2>Inspect → model → explore → patch → replay.</h2>
+        </div>
+        <ol class="agent-guide-list">
+          <li><span>01</span><div><h3>Inspect the solution</h3><p>Run <code>dotnet causalia inspect &lt;solution&gt; --format json</code>. Treat findings as leads, not conclusions.</p></div></li>
+          <li><span>02</span><div><h3>Choose one high-value boundary</h3><p>Start from a real production symptom and write the business invariant before modifying behavior.</p></div></li>
+          <li><span>03</span><div><h3>Build the smallest deterministic simulation</h3><p>Prefer ordinary .NET seams such as <code>TimeProvider</code>, propagated cancellation and narrow dependency interfaces.</p></div></li>
+          <li><span>04</span><div><h3>Preserve evidence</h3><p>If a simulation fails, keep the replay token and reduced sequence. Do not treat the trace as automatic root-cause proof.</p></div></li>
+          <li><span>05</span><div><h3>Patch from evidence</h3><p>Make the smallest production change justified by the failure path, then replay that exact path.</p></div></li>
+          <li><span>06</span><div><h3>Expand verification</h3><p>Run broader exploration and the existing unit, integration and end-to-end suite. Modeled provider semantics do not certify a real provider.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section container narrow-content">
+      <div class="prompt-card">
+        <div class="prompt-copy"><span class="mono-label">AGENT INSTRUCTION</span><h3>Copy a Causalia-aware debugging prompt</h3></div>
+        <pre id="standalone-agent-prompt">When investigating timing, retry, duplicate-delivery, restart, or concurrency risk in this .NET solution:
+
+1. Run "dotnet causalia inspect &lt;solution&gt; --format json" and use findings as leads, not conclusions.
+2. State the business invariant before editing production behavior.
+3. Choose one high-value boundary and build the smallest deterministic Causalia simulation around it.
+4. Prefer TimeProvider, CancellationToken and narrow dependency interfaces over Causalia-specific production abstractions.
+5. Preserve any replay token and reduced failure sequence.
+6. Make the smallest change supported by the evidence.
+7. Replay the exact failure, then run broader Causalia exploration and the existing test suite.
+8. Keep real infrastructure integration tests and do not claim modeled provider semantics certify the real provider.</pre>
+        <div class="prompt-actions"><button class="button" type="button" data-copy-target="standalone-agent-prompt">Copy prompt</button><a class="button button-ghost" href="./llms-full.txt">Open full machine context</a></div>
+      </div>
+    </section>
+
+    <section class="section container narrow-content">
+      <div class="section-heading"><div class="eyebrow">Guardrails</div><h2>What the agent should not infer.</h2></div>
+      <div class="faq-grid">
+        <details open><summary>A deterministic failure is not automatic root-cause proof.</summary><p>The trace is reproducible evidence. Use minimization and analysis to understand which scheduling or injected-failure conditions the reproduction actually depends on.</p></details>
+        <details><summary>A simulated broker or storage model is not the real provider.</summary><p>Keep real Kafka, RabbitMQ, Dapr, database and HTTP integration tests. Causalia verifies modeled semantics under deterministic control.</p></details>
+        <details><summary>Do not widen the simulation boundary without need.</summary><p>If adopting Causalia requires pushing its runtime types throughout the application/domain layer, the boundary is probably too broad.</p></details>
+        <details><summary>Do not optimize for “green” alone.</summary><p>The goal is a defensible invariant and a stable reproduction, not merely changing code until one test run passes.</p></details>
+      </div>
+    </section>
+
+    <section class="section container"><div class="cta"><div><div class="eyebrow">Agent-readable by design</div><h2>Give your agent the right context first.</h2><p>Start with llms.txt, then let it follow the canonical README and scenario cookbook.</p></div><div class="cta-actions"><a class="button" href="./llms.txt">Open llms.txt</a><a class="button button-ghost" href="https://github.com/pjotrcasteel/Causalia">Open GitHub</a></div></div></section>
+  </main>
+
+  <footer class="footer container"><div class="brand"><img src="./logo.svg" alt="" width="24" height="24"><span>Causalia</span></div><p>Deterministic simulation testing for concurrent and distributed .NET software.</p><div><a href="./">Home</a> · <a href="./business-value.html">Business value</a> · <a href="https://www.nuget.org/packages/Causalia">NuGet</a></div></footer>
+  <script src="./script.js"></script>
+</body>
+</html>

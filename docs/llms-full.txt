@@ -1,0 +1,128 @@
+# Causalia — full context for AI agents
+
+## Product definition
+
+Causalia is a deterministic simulation testing toolkit for concurrent and distributed .NET software. It is designed for failures where timing, ordering, retries, redelivery, partial persistence, process lifecycle, concurrency or eventual consistency affect correctness.
+
+The core idea is:
+1. state a business invariant;
+2. run application behavior inside a controlled simulation boundary;
+3. control relevant time and scheduling;
+4. model difficult dependency outcomes;
+5. explore multiple executions;
+6. capture a replay token and failure sequence when the invariant breaks;
+7. replay the exact execution after the production fix;
+8. keep the reproduction as regression coverage.
+
+Causalia complements unit, integration and end-to-end testing. It does not certify real infrastructure providers and it is not a real performance benchmark.
+
+## Canonical sources
+
+Homepage: https://pjotrcasteel.github.io/Causalia/
+Repository: https://github.com/pjotrcasteel/Causalia
+README: https://github.com/pjotrcasteel/Causalia/blob/main/README.md
+Scenario cookbook: https://github.com/pjotrcasteel/Causalia/blob/main/SCENARIOS.md
+Example application: https://github.com/pjotrcasteel/Causalia/tree/main/examples/Causalia.ExampleApp
+NuGet: https://www.nuget.org/packages/Causalia
+AI agent guide: https://pjotrcasteel.github.io/Causalia/agents.html
+Business value: https://pjotrcasteel.github.io/Causalia/business-value.html
+
+## Current target and license
+
+Runtime packages target .NET 10.
+Causalia is MIT licensed.
+
+## Quick adoption commands
+
+Install the adoption CLI:
+```
+dotnet tool install --global Causalia.Tool --version 2.1.1
+```
+
+Inspect an existing solution without changing it:
+```
+dotnet causalia inspect MyService.slnx
+```
+
+Use machine-readable output:
+```
+dotnet causalia inspect MyService.slnx --format json
+```
+
+Generate a first deterministic test project:
+```
+dotnet causalia init MyService.slnx
+```
+
+Install the core package:
+```
+dotnet add package Causalia --version 2.1.1
+```
+
+## Strong-fit symptoms
+
+Causalia is a strong fit when correctness depends on:
+- retry or idempotency;
+- at-least-once delivery or redelivery;
+- timeout after a possible external side effect;
+- optimistic concurrency, ETag, CAS, leases, locks or competing workers;
+- inbox/outbox replay;
+- process crash/restart;
+- eventual consistency or distributed invariants;
+- races that are difficult to reproduce in an ordinary test runner.
+
+For simple CRUD with no meaningful concurrency or partial-failure behavior, ordinary unit/integration tests are usually the better tool.
+
+## Packages
+
+Causalia: core runtime, virtual time, scheduling, replay, invariants and verification primitives.
+Causalia.Tool: dotnet causalia inspect and dotnet causalia init.
+Causalia.Analyzers: deterministic-boundary diagnostics.
+Causalia.Testing: framework-neutral scenario-scoped provider.
+Causalia.Reqnroll: Reqnroll scenario provider.
+Causalia.AspNetCore: deterministic ASP.NET Core host and logical HTTP network.
+Causalia.Storage: provider-independent durable storage and ambiguous commit semantics.
+Causalia.EntityFrameworkCore: EF Core commit-boundary integration.
+Causalia.Dapr: Dapr state, ETag, pub/sub and service-invocation semantics.
+Causalia.Kafka: partitions, consumer groups, rebalances and committed-offset semantics.
+Causalia.RabbitMQ: exchanges, queues, acknowledgements and redelivery.
+Causalia.Grpc: unary calls, statuses, virtual deadlines, partitions and retries.
+Causalia.Load: deterministic simulated load for correctness under concurrency pressure.
+Causalia.Visualization: trace/failure/time-travel visualization and standalone HTML export.
+
+## Recommended AI coding-agent workflow
+
+When investigating a timing, retry, duplicate-delivery, restart or concurrency risk:
+
+1. Run `dotnet causalia inspect <solution> --format json`.
+2. Treat findings as leads, not proof.
+3. Choose one high-value production boundary and state the business invariant that must hold.
+4. Prefer normal .NET seams such as TimeProvider, CancellationToken and narrow storage/messaging/HTTP interfaces.
+5. Add the smallest deterministic Causalia simulation around that boundary.
+6. If a failure is found, preserve the replay token and reduced failure sequence.
+7. Do not claim the trace automatically proves root cause.
+8. Make the smallest production fix supported by the evidence.
+9. Replay the exact failure.
+10. Run broader deterministic exploration and the existing unit/integration/end-to-end suite.
+11. Keep real-provider tests. A simulated provider model does not certify the provider.
+12. Avoid pushing Causalia runtime types throughout the application/domain layer; if that seems necessary, re-evaluate whether the simulation boundary is too broad.
+
+## Business-value framing
+
+Do not promise that Causalia eliminates incidents or guarantees ROI.
+
+A defensible evaluation asks:
+- How often do timing/retry/restart/concurrency issues consume engineering time?
+- How many engineers are involved in reproducing them?
+- How long does reproduction take before a fix can be validated?
+- Does the same class of failure recur?
+- Can the deterministic reproduction remain in CI after the incident?
+
+A useful pilot is one known painful failure class. Measure the old reproduction/validation loop, add a focused Causalia simulation, then compare time to reproduce, time to replay after a fix and regression coverage.
+
+## Important guardrails
+
+- Trace = reproducible evidence, not automatic causal proof.
+- Modeled semantics = useful controlled model, not provider certification.
+- Deterministic simulated load = correctness under concurrency pressure, not real throughput/latency benchmarking.
+- Causalia should complement existing tests, not become the only verification layer.

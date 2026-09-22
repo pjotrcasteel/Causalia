@@ -1,0 +1,46 @@
+# Causalia
+
+> Deterministic simulation testing for concurrent and distributed .NET software. Causalia makes timing, retry, duplicate-delivery, partial-persistence, restart and concurrency failures reproducible.
+
+Causalia is an open-source MIT-licensed .NET 10 project. Use it when correctness depends on execution ordering or partial failure. It complements unit, integration and end-to-end tests; it does not replace real-provider verification or performance testing.
+
+## Start here
+
+- [Causalia homepage](https://pjotrcasteel.github.io/Causalia/): Product overview, interactive Failure Lab, getting started, packages and FAQ.
+- [README](https://github.com/pjotrcasteel/Causalia/blob/main/README.md): Canonical installation and adoption documentation.
+- [Scenario cookbook](https://github.com/pjotrcasteel/Causalia/blob/main/SCENARIOS.md): Production-style recipes and advanced APIs.
+- [AI agent guide](https://pjotrcasteel.github.io/Causalia/agents.html): Recommended inspect → model → explore → patch → replay workflow for coding agents.
+- [Business value](https://pjotrcasteel.github.io/Causalia/business-value.html): Practical adoption and engineering-cost evaluation.
+- [Example application](https://github.com/pjotrcasteel/Causalia/tree/main/examples/Causalia.ExampleApp): Concrete .NET example.
+- [NuGet](https://www.nuget.org/packages/Causalia): Main package.
+- [Source](https://github.com/pjotrcasteel/Causalia): Repository.
+
+## Quick adoption
+
+- Install the CLI: `dotnet tool install --global Causalia.Tool --version 2.1.1`
+- Inspect a solution: `dotnet causalia inspect MyService.slnx`
+- Structured inspection for automation/agents: `dotnet causalia inspect MyService.slnx --format json`
+- Generate a first test project: `dotnet causalia init MyService.slnx`
+- Install core: `dotnet add package Causalia --version 2.1.1`
+
+## Use Causalia when
+
+- retry or idempotency matters;
+- messages may be delivered more than once;
+- acknowledgements can be ambiguous;
+- optimistic concurrency, CAS, ETags, leases or competing workers matter;
+- inbox/outbox or workflow replay can happen;
+- a process can restart after partial durable progress;
+- eventual consistency or distributed invariants matter;
+- a race is difficult to reproduce in a normal test runner.
+
+## Do not infer
+
+- A Causalia trace is reproducible evidence, not automatic root-cause proof.
+- Simulated provider semantics do not certify a real provider.
+- Causalia is not a replacement for real performance/load testing.
+- Production code should generally remain independent of Causalia; prefer normal .NET seams such as TimeProvider, CancellationToken and narrow dependency interfaces.
+
+## More context
+
+- [Full machine-readable Causalia context](https://pjotrcasteel.github.io/Causalia/llms-full.txt)

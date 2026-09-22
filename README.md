@@ -2,7 +2,7 @@
 
 > Deterministic simulation testing for concurrent and distributed .NET software.
 >
-> **Website:** https://pjotrcasteel.github.io/Causalia/ · **NuGet:** https://www.nuget.org/packages/Causalia
+> **Website:** https://pjotrcasteel.github.io/Causalia/ · **NuGet:** https://www.nuget.org/packages/Causalia · **AI agents:** https://pjotrcasteel.github.io/Causalia/agents.html · **Business value:** https://pjotrcasteel.github.io/Causalia/business-value.html
 
 Causalia makes failures caused by **timing, retries, duplicate delivery, partial persistence, restarts, and concurrency** reproducible.
 Instead of hoping a race happens again, a test controls time and scheduling, injects the difficult production outcome, states the invariant that must

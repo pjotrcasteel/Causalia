@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Causalia business value — reduce the cost of unreproducible failures</title>
+  <meta name="description" content="A practical framework for evaluating the engineering value of deterministic simulation testing with Causalia.">
+  <meta name="theme-color" content="#090d13">
+  <link rel="canonical" href="https://pjotrcasteel.github.io/Causalia/business-value.html">
+  <link rel="icon" href="./logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="nav-shell">
+    <nav class="nav container">
+      <a class="brand" href="./"><img src="./logo.svg" alt="" width="30" height="30"><span>Causalia</span></a>
+      <div class="nav-links"><a href="./#lab">Failure Lab</a><a href="./agents.html">AI agents</a><a href="./#start">Get started</a><a href="https://github.com/pjotrcasteel/Causalia">GitHub</a></div>
+      <a class="button button-small" href="https://www.nuget.org/packages/Causalia">NuGet</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-hero container">
+      <div class="eyebrow">Business value</div>
+      <h1>Turn rare failures into<br><span>repeatable engineering work.</span></h1>
+      <p class="hero-lead">Causalia is not a promise of zero incidents. It targets a specific cost center: engineering time lost to timing-dependent failures that are hard to reproduce, reason about and protect against after the fix.</p>
+      <div class="hero-actions"><a class="button" href="#evaluate">Evaluate your exposure</a><a class="button button-ghost" href="./#start">Try Causalia</a></div>
+    </section>
+
+    <section class="section container narrow-content">
+      <div class="section-heading"><div class="eyebrow">Where value can come from</div><h2>Less uncertainty in the debugging loop.</h2></div>
+      <div class="value-cards">
+        <article class="value-card"><span>01</span><h3>Reproduction time</h3><p>Teams spend less effort repeatedly recreating the timing window before they can even test a hypothesis.</p></article>
+        <article class="value-card"><span>02</span><h3>Regression protection</h3><p>The failure becomes executable evidence that can stay in CI instead of living only in an incident document.</p></article>
+        <article class="value-card"><span>03</span><h3>Change confidence</h3><p>Retry, concurrency and recovery changes can be checked against exact failure paths plus broader schedule exploration.</p></article>
+      </div>
+    </section>
+
+    <section id="evaluate" class="section value-section">
+      <div class="container narrow-content">
+        <div class="section-heading"><div class="eyebrow">Estimate current exposure</div><h2>Start with your debugging cost, not a vendor ROI claim.</h2><p>Use your own numbers. The calculator estimates engineering cost tied up in this category of incident; it does not assume Causalia removes all of it.</p></div>
+        <div class="impact-calculator standalone">
+          <div class="impact-copy"><span class="mono-label">YOUR INPUTS</span><h3>Timing-dependent incident exposure</h3><p>Count only incidents where retry, ordering, duplicate delivery, partial progress, restart or concurrency meaningfully increased debugging effort.</p></div>
+          <div class="impact-controls">
+            <label><span>Relevant incidents / month <b id="incidents-value">2</b></span><input id="incidents" type="range" min="1" max="20" value="2"></label>
+            <label><span>Engineers involved <b id="engineers-value">2</b></span><input id="engineers" type="range" min="1" max="10" value="2"></label>
+            <label><span>Hours per engineer <b id="hours-value">4</b></span><input id="hours" type="range" min="1" max="24" value="4"></label>
+            <label><span>Loaded hourly cost <b id="cost-value">€100</b></span><input id="cost" type="range" min="50" max="250" step="10" value="100"></label>
+          </div>
+          <div class="impact-results">
+            <div><span>Engineering time exposed</span><strong id="impact-hours">16 h / month</strong></div>
+            <div><span>Estimated cost exposure</span><strong id="impact-monthly">€1,600 / month</strong></div>
+            <div><span>Annualized exposure</span><strong id="impact-yearly">€19,200 / year</strong></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container narrow-content">
+      <div class="section-heading"><div class="eyebrow">A defensible adoption test</div><h2>Prove value on one real failure class.</h2></div>
+      <div class="three-step">
+        <article><span>01</span><div><h3>Pick a painful symptom</h3><p>Choose one retry, redelivery, restart or race condition the team already understands and has struggled to reproduce.</p></div></article>
+        <article><span>02</span><div><h3>Measure the old loop</h3><p>Capture how long reproduction and validation currently take, how many people are involved and how often the failure recurs.</p></div></article>
+        <article><span>03</span><div><h3>Compare the new loop</h3><p>Measure time to deterministic reproduction, time to replay after a fix, and whether the scenario can remain in regression testing.</p></div></article>
+      </div>
+    </section>
+
+    <section class="section container narrow-content">
+      <div class="section-heading"><div class="eyebrow">When not to adopt</div><h2>A smaller “no” is better than a vague “yes”.</h2></div>
+      <div class="faq-grid">
+        <details open><summary>Your system is mostly simple CRUD.</summary><p>If meaningful correctness does not depend on timing, partial failure or concurrency, ordinary unit and integration tests will usually give a better return.</p></details>
+        <details><summary>You need provider certification.</summary><p>A deterministic model does not prove a real Kafka broker, database, Dapr sidecar or HTTP stack behaves exactly as expected. Use real integration tests for that.</p></details>
+        <details><summary>Your main concern is throughput or latency.</summary><p>Causalia.Load is for deterministic correctness under concurrency pressure, not a substitute for real performance and capacity testing.</p></details>
+        <details><summary>You cannot state the business invariant.</summary><p>If the team cannot say what must remain true, adding more schedule exploration may only generate noise. Start by defining the guarantee.</p></details>
+      </div>
+    </section>
+
+    <section class="section container"><div class="cta"><div><div class="eyebrow">Evaluate it with evidence</div><h2>Start with one boundary and one invariant.</h2><p>Small adoption surface, measurable before/after debugging loop.</p></div><div class="cta-actions"><a class="button" href="./#start">Get started</a><a class="button button-ghost" href="./agents.html">AI agent workflow</a></div></div></section>
+  </main>
+
+  <footer class="footer container"><div class="brand"><img src="./logo.svg" alt="" width="24" height="24"><span>Causalia</span></div><p>Deterministic simulation testing for concurrent and distributed .NET software.</p><div><a href="./">Home</a> · <a href="./agents.html">AI agents</a> · <a href="https://www.nuget.org/packages/Causalia">NuGet</a></div></footer>
+  <script src="./script.js"></script>
+</body>
+</html>
