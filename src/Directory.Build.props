@@ -3,4 +3,10 @@
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="../docs/causalia-icon.png"
+          Pack="true"
+          PackagePath=""
+          Visible="false" />
+  </ItemGroup>
 </Project>
