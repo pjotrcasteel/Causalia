@@ -15,11 +15,10 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EnablePackageValidation>true</EnablePackageValidation>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl
-      Condition="'$(RepositoryUrl)' == '' and '$(GITHUB_SERVER_URL)' != '' and '$(GITHUB_REPOSITORY)' != ''">
-      $(GITHUB_SERVER_URL)/$(GITHUB_REPOSITORY)
-    </RepositoryUrl>
-    <PublishRepositoryUrl Condition="'$(RepositoryUrl)' != ''">true</PublishRepositoryUrl>
+    <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/pjotrcasteel/Causalia</RepositoryUrl>
+    <PackageProjectUrl>https://pjotrcasteel.github.io/Causalia/</PackageProjectUrl>
+    <PackageIcon>causalia-icon.png</PackageIcon>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditMode>all</NuGetAuditMode>
     <NuGetAuditLevel>low</NuGetAuditLevel>
