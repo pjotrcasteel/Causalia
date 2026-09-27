@@ -1,0 +1,16 @@
+{
+  "name": "Causalia",
+  "short_name": "Causalia",
+  "description": "Deterministic simulation testing for concurrent and distributed .NET software.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#090d13",
+  "theme_color": "#090d13",
+  "icons": [
+    {
+      "src": "./causalia-icon.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }
+  ]
+}
