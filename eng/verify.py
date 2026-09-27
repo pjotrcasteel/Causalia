@@ -11,6 +11,8 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+PROJECT_URL = 'https://pjotrcasteel.github.io/Causalia/'
+REPOSITORY_URL = 'https://github.com/pjotrcasteel/Causalia'
 EXCLUDED = {'bin', 'obj', '.git', '.vs', 'artifacts', 'TestResults', '__pycache__'}
 
 
@@ -68,6 +70,15 @@ def verify_packages(directory):
             version = metadata.find('{*}version').text
             ids.append((name, version))
             require(metadata.find('{*}license').text == 'MIT', f'Missing MIT metadata: {name}')
+            require(metadata.find('{*}projectUrl') is not None and metadata.find('{*}projectUrl').text == PROJECT_URL,
+                    f'Unexpected project URL: {name}')
+            require(metadata.find('{*}icon') is not None and metadata.find('{*}icon').text == 'causalia-icon.png',
+                    f'Missing package icon metadata: {name}')
+            repository = metadata.find('{*}repository')
+            require(repository is not None and repository.attrib.get('type') == 'git'
+                    and repository.attrib.get('url') == REPOSITORY_URL,
+                    f'Unexpected repository metadata: {name}')
+            require('causalia-icon.png' in entries, f'Missing package icon payload: {name}')
             require(package.read('README.md') == (ROOT / 'README.md').read_bytes(), f'Outdated package README: {name}')
             require(package.read('SCENARIOS.md') == (ROOT / 'SCENARIOS.md').read_bytes(), f'Outdated package scenarios: {name}')
             markdown_entries = sorted(n for n in entries if n.lower().endswith('.md'))
@@ -84,7 +95,7 @@ def verify_packages(directory):
                 require(f'lib/net10.0/{name}.xml' in entries, f'Missing XML API documentation: {name}')
                 require(not any(n.startswith('lib/') and not n.startswith('lib/net10.0/') for n in entries),
                         f'Unexpected runtime framework: {name}')
-    print('Packages verified: 14 NuGet packages, 12 symbol packages, README + SCENARIOS per package.', flush=True)
+    print('Packages verified: 14 NuGet packages, 12 symbol packages, canonical metadata, icon, README + SCENARIOS per package.', flush=True)
     return ids
 
 
