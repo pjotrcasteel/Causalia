@@ -1,4 +1,4 @@
-# Causalia 2.2.0 — Scenarios and advanced reference
+# Causalia 2.3.0 — Scenarios and advanced reference
 
 This is the scenario cookbook and complete advanced reference for Causalia. If you are new to the project, start with
 [README.md](README.md): install the tool, run `inspect`, generate the first test with `init`, and get one deterministic simulation green.
@@ -563,7 +563,7 @@ Causalia is a deterministic simulation-testing toolkit for concurrent and distri
 It lets you control time, scheduling, failures, messaging, service-to-service HTTP and durable storage so race conditions and partial failures
 become reproducible instead of probabilistic.
 
-> Repository version: `2.2.0`. Runtime packages and tests target **net10.0 only**.
+> Repository version: `2.3.0`. Runtime packages and tests target **net10.0 only**.
 > Causalia 2.0 completes the Verification Platform as DS-26, unifying the deterministic engines from 1.0 through 1.9.
 
 <a id="overview-why-causalia"></a>

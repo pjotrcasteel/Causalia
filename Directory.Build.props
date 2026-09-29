@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
-    <Version>2.2.0</Version>
-    <PackageReleaseNotes>Causalia 2.2.0 adds typed fault rules, deterministic Azure Service Bus delivery and settlement semantics, application-boundary test generation, and Service Bus trace visualization.</PackageReleaseNotes>
+    <Version>2.3.0</Version>
+    <PackageReleaseNotes>Causalia 2.3.0 adds typed fault rules, deterministic Azure Service Bus delivery and settlement semantics, application-boundary test generation, and Service Bus trace visualization.</PackageReleaseNotes>
     <Authors>Causalia contributors</Authors>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>

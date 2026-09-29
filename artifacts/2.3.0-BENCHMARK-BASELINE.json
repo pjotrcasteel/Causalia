@@ -1,5 +1,5 @@
 {
-  "version": "2.2.0",
+  "version": "2.3.0",
   "runtime": ".NET 10.0.11, Release, Linux x64",
   "method": "100 warmup runs, then 1000 sequential scenarios, three independent process runs; GC total allocated bytes approximate",
   "results": [
