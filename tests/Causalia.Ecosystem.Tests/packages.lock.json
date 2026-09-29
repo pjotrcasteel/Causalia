@@ -98,39 +98,45 @@
       "causalia.aspnetcore": {
         "type": "Project",
         "dependencies": {
-          "Causalia": "[2.0.1, )"
+          "Causalia": "[2.1.1, )"
+        }
+      },
+      "causalia.azureservicebus": {
+        "type": "Project",
+        "dependencies": {
+          "Causalia": "[2.1.1, )"
         }
       },
       "causalia.dapr": {
         "type": "Project",
         "dependencies": {
-          "Causalia": "[2.0.1, )",
-          "Causalia.AspNetCore": "[2.0.1, )",
-          "Causalia.Storage": "[2.0.1, )"
+          "Causalia": "[2.1.1, )",
+          "Causalia.AspNetCore": "[2.1.1, )",
+          "Causalia.Storage": "[2.1.1, )"
         }
       },
       "causalia.grpc": {
         "type": "Project",
         "dependencies": {
-          "Causalia": "[2.0.1, )"
+          "Causalia": "[2.1.1, )"
         }
       },
       "causalia.kafka": {
         "type": "Project",
         "dependencies": {
-          "Causalia": "[2.0.1, )"
+          "Causalia": "[2.1.1, )"
         }
       },
       "causalia.rabbitmq": {
         "type": "Project",
         "dependencies": {
-          "Causalia": "[2.0.1, )"
+          "Causalia": "[2.1.1, )"
         }
       },
       "causalia.storage": {
         "type": "Project",
         "dependencies": {
-          "Causalia": "[2.0.1, )"
+          "Causalia": "[2.1.1, )"
         }
       }
     }

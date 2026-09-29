@@ -50,6 +50,10 @@ internal sealed class TechnologyDetector
             {
                 technologies.Add("RabbitMQ");
             }
+            else if (package.StartsWith("Azure.Messaging.ServiceBus", StringComparison.OrdinalIgnoreCase))
+            {
+                technologies.Add("Azure Service Bus");
+            }
             else if (package.StartsWith("Grpc.", StringComparison.OrdinalIgnoreCase)
                      || package.StartsWith("Google.Protobuf", StringComparison.OrdinalIgnoreCase))
             {
@@ -91,6 +95,9 @@ internal sealed class TechnologyDetector
                 break;
             case "RabbitMQ":
                 technologies.Add("RabbitMQ");
+                break;
+            case "Azure Service Bus":
+                technologies.Add("Azure Service Bus");
                 break;
             case "gRPC":
                 technologies.Add("gRPC");

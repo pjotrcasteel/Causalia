@@ -1,4 +1,4 @@
-# Causalia 2.1.1
+# Causalia 2.2.0
 
 > Deterministic simulation testing for concurrent and distributed .NET software.
 >
@@ -35,7 +35,7 @@ For simple CRUD with no meaningful concurrency or partial-failure behavior, ordi
 Install the adoption CLI:
 
 ```bash
-dotnet tool install --global Causalia.Tool --version 2.1.1
+dotnet tool install --global Causalia.Tool --version 2.2.0
 ```
 
 Inspect an existing solution without changing it:
@@ -65,6 +65,15 @@ dotnet causalia init MyService.slnx --project src/Orders/Orders.csproj
 
 `init` creates one compiling test project and a green deterministic simulation. It does not invent domain adapters or rewrite production code. Existing
 generated output is protected; replacement requires `--force`.
+
+Generate boundary-specific test scaffolding from inspection findings:
+
+```bash
+dotnet causalia generate MyService.slnx --project src/Orders/Orders.csproj
+```
+
+`generate` also creates the test project. It emits a typed Service Bus redelivery scenario when it finds Azure Service Bus usage, and conservative
+simulation skeletons for other detected boundaries. Replace the marked TODOs with the real application entry point and business invariant.
 
 Tests normally go in `tests/<Project>.Causalia.Tests`. If this would put them inside the production project's source tree,
 `init` uses `.causalia/tests/<Project>.Causalia.Tests`, which .NET SDK default compile items exclude from the parent project.
@@ -184,6 +193,7 @@ Start with `Causalia`, then add only the integrations your test actually needs.
 | `Causalia.Dapr` | Dapr state, ETag, pub/sub and service-invocation semantics |
 | `Causalia.Kafka` | partitions, consumer groups, rebalances and committed-offset semantics |
 | `Causalia.RabbitMQ` | exchanges, queues, acknowledgements and redelivery |
+| `Causalia.AzureServiceBus` | deterministic queues, topic subscriptions, PeekLock settlement, sessions and lock expiry |
 | `Causalia.Grpc` | unary calls, statuses, virtual deadlines, partitions and retries |
 | `Causalia.Load` | deterministic simulated load for correctness under concurrency pressure |
 | `Causalia.Visualization` | trace/failure/time-travel visualization and standalone HTML export |
@@ -191,8 +201,8 @@ Start with `Causalia`, then add only the integrations your test actually needs.
 Typical test-project start:
 
 ```bash
-dotnet add package Causalia --version 2.1.1
-dotnet add package Causalia.Analyzers --version 2.1.1
+dotnet add package Causalia --version 2.2.0
+dotnet add package Causalia.Analyzers --version 2.2.0
 ```
 
 <a id="adopt-existing"></a>

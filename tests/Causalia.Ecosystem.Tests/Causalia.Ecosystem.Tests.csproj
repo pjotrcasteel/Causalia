@@ -11,6 +11,7 @@
     <ProjectReference Include="../../src/Causalia.Dapr/Causalia.Dapr.csproj" />
     <ProjectReference Include="../../src/Causalia.Kafka/Causalia.Kafka.csproj" />
     <ProjectReference Include="../../src/Causalia.RabbitMQ/Causalia.RabbitMQ.csproj" />
+    <ProjectReference Include="../../src/Causalia.AzureServiceBus/Causalia.AzureServiceBus.csproj" />
     <ProjectReference Include="../../src/Causalia.Grpc/Causalia.Grpc.csproj" />
   </ItemGroup>
 </Project>

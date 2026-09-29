@@ -34,6 +34,7 @@ internal static class TraceEventClassifier
             "dapr" => TraceEventCategory.Dapr,
             "kafka" => TraceEventCategory.Kafka,
             "rabbitmq" => TraceEventCategory.RabbitMQ,
+            "servicebus" => TraceEventCategory.AzureServiceBus,
             "grpc" => TraceEventCategory.Grpc,
             "reality" => TraceEventCategory.ProductionReality,
             _ => TraceEventCategory.User
@@ -57,13 +58,14 @@ internal static class TraceEventClassifier
                 "dropped",
                 "partitioned",
                 "unavailable",
-                "crashed"))
+                "crashed",
+                "rejected"))
         {
             return TraceEventSeverity.Error;
         }
 
         if (category == TraceEventCategory.Fault ||
-            ContainsAnyStatus(statusParts, "fault", "delayed", "duplicated", "deadline", "cancelled"))
+            ContainsAnyStatus(statusParts, "fault", "delayed", "duplicated", "deadline", "cancelled", "expired", "lost"))
         {
             return TraceEventSeverity.Warning;
         }
@@ -97,6 +99,7 @@ internal static class TraceEventClassifier
             TraceEventCategory.Kafka => PartAt(parts, 2),
             TraceEventCategory.RabbitMQ when ElementAtOrDefault(parts, 1) == "publish" => PartAt(parts, 2),
             TraceEventCategory.RabbitMQ => PartAt(parts, 1),
+            TraceEventCategory.AzureServiceBus => PartAt(parts, 1),
             TraceEventCategory.Grpc => PartAt(parts, 2),
             _ => Array.Empty<string>()
         };
@@ -134,6 +137,7 @@ internal static class TraceEventClassifier
             TraceEventCategory.Dapr => ClassifyDaprLane(parts),
             TraceEventCategory.Kafka => ClassifyKafkaLane(parts),
             TraceEventCategory.RabbitMQ => ClassifyRabbitLane(parts),
+            TraceEventCategory.AzureServiceBus => ClassifyServiceBusLane(parts),
             TraceEventCategory.Grpc => ClassifyGrpcLane(parts),
             TraceEventCategory.ProductionReality => "production-reality",
             TraceEventCategory.Fault => "faults",
@@ -158,6 +162,7 @@ internal static class TraceEventClassifier
             TraceEventCategory.Dapr => FindDaprCorrelationId(parts),
             TraceEventCategory.Kafka => FindKafkaCorrelationId(parts),
             TraceEventCategory.RabbitMQ => FindRabbitCorrelationId(parts),
+            TraceEventCategory.AzureServiceBus => FindServiceBusCorrelationId(parts),
             TraceEventCategory.Grpc => FindGrpcCorrelationId(parts),
             TraceEventCategory.ProductionReality when parts.Count > 3 => $"reality:{parts[3]}",
             _ => null
@@ -177,6 +182,20 @@ internal static class TraceEventClassifier
     private static string ClassifyRabbitLane(IReadOnlyList<string> parts)
     {
         return parts.Count > 3 ? $"rabbitmq/{parts[3]}" : "rabbitmq";
+    }
+
+    private static string ClassifyServiceBusLane(IReadOnlyList<string> parts)
+    {
+        var index = parts.Count > 2 && parts[1] == "settled" ? 3 : 2;
+        return parts.Count > index ? $"servicebus/{parts[index]}" : "servicebus";
+    }
+
+    private static string? FindServiceBusCorrelationId(IReadOnlyList<string> parts)
+    {
+        var index = parts.Count > 1 && (parts[1] == "settled" || parts[1] == "deadletter") ? 4 : 3;
+        return parts.Count > index && long.TryParse(parts[index], out var sequence)
+            ? $"servicebus:{sequence}"
+            : null;
     }
 
     private static string ClassifyGrpcLane(IReadOnlyList<string> parts)

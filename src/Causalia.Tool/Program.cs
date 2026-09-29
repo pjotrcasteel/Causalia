@@ -67,6 +67,15 @@ internal static class Program
             options.ProjectPath,
             options.Force,
             cancellationToken);
+        if (string.Equals(options.Command, "generate", StringComparison.OrdinalIgnoreCase))
+        {
+            var target = await new InspectionTargetResolver().ResolveAsync(options.TargetPath, cancellationToken);
+            var projectPath = Path.GetFullPath(Path.Combine(target.RootDirectory, result.TargetProject));
+            var inspector = new ProjectInspector();
+            var report = await inspector.InspectAsync(projectPath, cancellationToken);
+            var testDirectory = Path.GetDirectoryName(Path.GetFullPath(Path.Combine(target.RootDirectory, result.TestProject)));
+            await Generation.ScenarioGenerator.WriteAsync(testDirectory!, report, cancellationToken);
+        }
         await InitializationResultWriter.WriteAsync(result, Console.Out, cancellationToken);
         return 0;
     }
@@ -79,6 +88,7 @@ internal static class Program
             Usage:
               dotnet causalia inspect [path] [--format text|json]
               dotnet causalia init [path] [--project <project.csproj>] [--force]
+              dotnet causalia generate [path] [--project <project.csproj>] [--force]
 
             Targets:
               directory   Inspect or initialize from all .csproj files below the directory.

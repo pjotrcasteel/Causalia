@@ -7,6 +7,28 @@ namespace Causalia.Visualization.Tests;
 public sealed class SimulationTraceVisualizationTests
 {
     [TestMethod]
+    public async Task ServiceBusEvents_KeepOneCorrelationAcrossDeliveryAndSettlement()
+    {
+        var result = await Simulation.RunAsync(
+            context =>
+            {
+                context.TraceEvent("servicebus:delivered:orders:42:2");
+                context.TraceEvent("servicebus:lock-expired:orders:42");
+                context.TraceEvent("servicebus:settled:Complete:orders:42");
+                context.TraceEvent("servicebus:settlement-ack-lost:orders:42");
+                return Task.CompletedTask;
+            },
+            TestContext.CancellationToken);
+
+        var events = result.ToTraceDocument().Events
+            .Where(value => value.Category == TraceEventCategory.AzureServiceBus).ToArray();
+        Assert.AreEqual(4, events.Length);
+        Assert.IsTrue(events.All(value => value.CorrelationId == "servicebus:42"));
+        Assert.IsTrue(events.All(value => value.Lane == "servicebus/orders"));
+        Assert.AreEqual(TraceEventSeverity.Warning, events[1].Severity);
+        Assert.AreEqual(TraceEventSeverity.Warning, events[3].Severity);
+    }
+    [TestMethod]
     public async Task CreateDocumentClassifiesSchedulerAndUserEvents()
     {
         var result = await Simulation.RunAsync(

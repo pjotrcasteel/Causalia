@@ -9,6 +9,14 @@ public sealed class FaultPlan<TContext, TEffect>
 
     internal IReadOnlyList<IFaultPolicy<TContext, TEffect>> Policies => _policies;
 
+    /// <summary>Begins a typed rule for an adapter event within this fault plan.</summary>
+    public TypedFaultRuleBuilder<TContext, TEvent, TEffect> On<TEvent>(string name)
+        where TEvent : TContext
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        return new TypedFaultRuleBuilder<TContext, TEvent, TEffect>(this, name);
+    }
+
     /// <summary>
     /// Adds a uniquely named policy to the plan.
     /// </summary>

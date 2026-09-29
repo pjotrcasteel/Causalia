@@ -71,6 +71,14 @@ internal sealed partial class SourceInspector
     {
         new()
         {
+            Category = "Azure Service Bus",
+            Score = 100,
+            Reason = "ServiceBusClient or ServiceBusProcessor marks a message delivery and settlement boundary.",
+            SuggestedScenario = "Simulate a failed settlement, lock expiry and redelivery; verify idempotent handling.",
+            Tokens = new List<string> { "ServiceBusClient", "ServiceBusProcessor", "ServiceBusReceiver" }.AsReadOnly()
+        },
+        new()
+        {
             Category = "Dapr",
             Score = 100,
             Reason = "DaprClient is an external messaging/service invocation boundary.",
