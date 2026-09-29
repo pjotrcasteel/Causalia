@@ -8,7 +8,7 @@
       "causalia.azureservicebus": {
         "type": "Project",
         "dependencies": {
-          "Causalia": "[2.2.0, )"
+          "Causalia": "[2.3.0, )"
         }
       }
     }

@@ -1,4 +1,4 @@
-# Causalia 2.2.0
+# Causalia 2.3.0
 
 > Deterministic simulation testing for concurrent and distributed .NET software.
 >
@@ -35,7 +35,7 @@ For simple CRUD with no meaningful concurrency or partial-failure behavior, ordi
 Install the adoption CLI:
 
 ```bash
-dotnet tool install --global Causalia.Tool --version 2.2.0
+dotnet tool install --global Causalia.Tool --version 2.3.0
 ```
 
 Inspect an existing solution without changing it:
@@ -201,8 +201,8 @@ Start with `Causalia`, then add only the integrations your test actually needs.
 Typical test-project start:
 
 ```bash
-dotnet add package Causalia --version 2.2.0
-dotnet add package Causalia.Analyzers --version 2.2.0
+dotnet add package Causalia --version 2.3.0
+dotnet add package Causalia.Analyzers --version 2.3.0
 ```
 
 <a id="adopt-existing"></a>
