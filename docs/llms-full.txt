@@ -32,6 +32,8 @@ Business value: https://pjotrcasteel.github.io/Causalia/business-value.html
 Runtime packages target .NET 10.
 Causalia is MIT licensed.
 
+Version status: 2.3.0 source is on GitHub. It adds Azure Service Bus simulation, typed fault scenarios and `dotnet causalia generate`. The latest published NuGet release is 2.1.1, used by the installation commands below.
+
 ## Quick adoption commands
 
 Install the adoption CLI:
