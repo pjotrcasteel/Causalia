@@ -4,7 +4,7 @@ namespace Causalia.Tool.Initialization;
 
 internal static class PackageVersionResolver
 {
-    private const string FallbackVersion = "2.1.1";
+    private const string FallbackVersion = "2.2.0";
 
     public static string GetCausaliaVersion()
     {

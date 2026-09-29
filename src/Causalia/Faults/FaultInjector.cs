@@ -21,7 +21,9 @@ public sealed class FaultInjector<TContext, TEffect>
         long injectorId,
         FaultExecutionController executionController)
     {
-        _policies = plan.Policies.ToList().AsReadOnly();
+        _policies = plan.Policies.Select(policy => policy is IInjectorScopedFaultPolicy<TContext, TEffect> scoped
+            ? scoped.CreateForInjector()
+            : policy).ToList().AsReadOnly();
         _streamSeed = streamSeed;
         _scope = scope;
         _injectorId = injectorId;

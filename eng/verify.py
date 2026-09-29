@@ -58,8 +58,8 @@ def verify_source():
 
 def verify_packages(directory):
     packages = sorted(directory.glob('*.nupkg'))
-    require(len(packages) == 14, f'Expected 14 packages, got {len(packages)}')
-    require(len(list(directory.glob('*.snupkg'))) == 12, 'Expected 12 symbol packages')
+    require(len(packages) == 15, f'Expected 15 packages, got {len(packages)}')
+    require(len(list(directory.glob('*.snupkg'))) == 13, 'Expected 13 symbol packages')
     ids = []
     for path in packages:
         with zipfile.ZipFile(path) as package:
@@ -95,7 +95,7 @@ def verify_packages(directory):
                 require(f'lib/net10.0/{name}.xml' in entries, f'Missing XML API documentation: {name}')
                 require(not any(n.startswith('lib/') and not n.startswith('lib/net10.0/') for n in entries),
                         f'Unexpected runtime framework: {name}')
-    print('Packages verified: 14 NuGet packages, 12 symbol packages, canonical metadata, icon, README + SCENARIOS per package.', flush=True)
+    print('Packages verified: 15 NuGet packages, 13 symbol packages, canonical metadata, icon, README + SCENARIOS per package.', flush=True)
     return ids
 
 
@@ -238,6 +238,18 @@ def verify_tool_consumer(work, ids, dotnet, env):
     generated_project = work / '.causalia' / 'tests' / 'Consumer.Causalia.Tests' / 'Consumer.Causalia.Tests.csproj'
     require(generated_project.exists(), 'Packaged tool did not generate the Causalia test project')
     verify_generated_project(work, generated_project, dotnet, env)
+    (work / 'OrderHandler.cs').write_text(
+        'public sealed class OrderHandler { public ServiceBusClient Client { get; } = new(); }\n'
+        'public sealed class ServiceBusClient { }\n')
+    completed = subprocess.run(
+        [str(executable), 'generate', 'Consumer.csproj', '--force'], cwd=work, env=env, text=True,
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=120)
+    require(completed.returncode == 0, completed.stdout)
+    generated_scenarios = generated_project.with_name('GeneratedBoundarySimulationTests.cs')
+    require(generated_scenarios.exists(), 'Generate did not emit boundary scenarios')
+    require('AzureServiceBus_RedeliveryRequiresIdempotentHandler' in generated_scenarios.read_text(),
+            'Generate did not select the Service Bus scenario')
+    verify_generated_project(work, generated_project, dotnet, env)
 
     # Repeat for direct-project initialization with inherited central versions and an existing .slnx.
     # Keep this above the consumer, matching repositories that centralize packages above src/<project>.
@@ -263,7 +275,7 @@ def verify_tool_consumer(work, ids, dotnet, env):
     require(any(project.attrib['Path'] == generated_project.relative_to(work).as_posix() for project in solution_projects),
             'Packaged tool did not add the generated test project to the .slnx')
     verify_generated_project(work, generated_project, dotnet, env)
-    print('Packaged adoption tool verified: inspect, isolated init, inherited central packages, .slnx and generated tests passed.', flush=True)
+    print('Packaged adoption tool verified: inspect, init, generate, central packages, .slnx and generated tests passed.', flush=True)
 
 
 def verify_generated_project(work, generated_project, dotnet, env):

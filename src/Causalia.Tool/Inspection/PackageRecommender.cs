@@ -47,6 +47,9 @@ internal sealed class PackageRecommender
                 case "RabbitMQ":
                     packages.Add("Causalia.RabbitMQ");
                     break;
+                case "Azure Service Bus":
+                    packages.Add("Causalia.AzureServiceBus");
+                    break;
                 case "gRPC":
                     packages.Add("Causalia.Grpc");
                     break;

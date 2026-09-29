@@ -76,7 +76,7 @@ internal sealed class CommandLineOptions
 
             if (string.Equals(argument, "--project", StringComparison.OrdinalIgnoreCase))
             {
-                EnsureCommand(command, "init", "--project");
+                EnsureInitializationCommand(command, "--project");
                 index = MoveToOptionValue(arguments, index, "--project");
                 projectPath = arguments[index];
                 continue;
@@ -84,7 +84,7 @@ internal sealed class CommandLineOptions
 
             if (string.Equals(argument, "--force", StringComparison.OrdinalIgnoreCase))
             {
-                EnsureCommand(command, "init", "--force");
+                EnsureInitializationCommand(command, "--force");
                 force = true;
                 continue;
             }
@@ -126,10 +126,18 @@ internal sealed class CommandLineOptions
         }
     }
 
+    private static void EnsureInitializationCommand(string command, string option)
+    {
+        if (!string.Equals(command, "init", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(command, "generate", StringComparison.OrdinalIgnoreCase))
+            throw new ArgumentException($"{option} is only valid with 'init' or 'generate'.");
+    }
+
     private static bool IsSupportedCommand(string command)
     {
         return string.Equals(command, "inspect", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(command, "init", StringComparison.OrdinalIgnoreCase);
+            || string.Equals(command, "init", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(command, "generate", StringComparison.OrdinalIgnoreCase);
     }
 
     private static CommandLineOptions CreateHelpOptions()

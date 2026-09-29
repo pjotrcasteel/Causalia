@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dependencies": {
+    "net10.0": {
+      "causalia": {
+        "type": "Project"
+      },
+      "causalia.azureservicebus": {
+        "type": "Project",
+        "dependencies": {
+          "Causalia": "[2.2.0, )"
+        }
+      }
+    }
+  }
+}

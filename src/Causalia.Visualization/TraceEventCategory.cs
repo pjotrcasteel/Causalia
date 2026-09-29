@@ -80,6 +80,11 @@ public enum TraceEventCategory
     RabbitMQ,
 
     /// <summary>
+    /// Azure Service Bus delivery, locks, sessions and settlement activity.
+    /// </summary>
+    AzureServiceBus,
+
+    /// <summary>
     /// gRPC call, deadline and retry activity.
     /// </summary>
     Grpc,

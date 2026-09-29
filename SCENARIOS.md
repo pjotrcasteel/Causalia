@@ -1,4 +1,4 @@
-# Causalia 2.1.1 — Scenarios and advanced reference
+# Causalia 2.2.0 — Scenarios and advanced reference
 
 This is the scenario cookbook and complete advanced reference for Causalia. If you are new to the project, start with
 [README.md](README.md): install the tool, run `inspect`, generate the first test with `init`, and get one deterministic simulation green.
@@ -17,12 +17,38 @@ The complete source-backed example later in this document is checked by `eng/ver
 | Two operations update the same state | [Concurrent update / ETag race](#scenario-concurrent-update) | scheduling + storage |
 | Inbox/outbox records are replayed | [Inbox/outbox replay](#scenario-outbox-replay) | storage + messaging |
 | Dapr/Kafka/RabbitMQ retries after acknowledgement loss | [Broker redelivery](#scenario-broker-redelivery) | ecosystem adapters |
+| Service Bus settlement is ambiguous | [Service Bus settlement](#scenario-servicebus) | `Causalia.AzureServiceBus` |
 | A process dies halfway through work | [Service restart](#scenario-service-restart) | process lifecycle |
 | HTTP timed out after the remote side may have completed | [Ambiguous HTTP outcome](#scenario-http-timeout) | ASP.NET Core networking |
 | Replicas converge later | [Eventual consistency](#scenario-eventual-consistency) | invariants + consistency |
 | Two workers compete for a lease | [Lease ownership race](#scenario-lease-race) | scheduling + storage |
 | A race only appears under some interleavings | [Schedule exploration / DPOR](#scenario-exploration) | exploration |
 | The failure is hard to explain | [Replay, minimization and failure intelligence](#scenario-failure-analysis) | failure intelligence |
+
+<a id="scenario-servicebus"></a>
+
+## Azure Service Bus delivery and settlement
+
+Create a broker in the simulation, then connect your application's message handler to the simulated delivery and settlement boundary. A typed
+fault rule runs through the existing fault injector and therefore participates in replay and minimization:
+
+```csharp
+var plan = new FaultPlan<ServiceBusSettlementEvent, ServiceBusSettlementFault>();
+plan.On<ServiceBusSettlementEvent>("reject-first-complete")
+    .Where(e => e.Action == ServiceBusSettlementAction.Complete)
+    .Once()
+    .Apply(_ => ServiceBusSettlementFault.Reject);
+
+var broker = context.CreateAzureServiceBus(plan);
+broker.CreateQueue("orders", TimeSpan.FromSeconds(30));
+await broker.SendAsync("orders", payload, null, context.CancellationToken);
+var delivery = await broker.ReceiveAsync("orders", context.CancellationToken);
+```
+
+On a rejected settlement the lock can expire under virtual time and the message is redelivered with an increased delivery count. A lost
+acknowledgement **after a successful Complete** does not redeliver that message: the broker has removed it. Sessions have exclusive virtual-time
+ownership; disposing a session receiver releases its unsettled message locks while preserving broker state across a simulated process restart.
+This package models application-visible outcomes, not the full Azure Service Bus protocol or SDK.
 
 <a id="scenario-lost-db-ack"></a>
 
@@ -537,7 +563,7 @@ Causalia is a deterministic simulation-testing toolkit for concurrent and distri
 It lets you control time, scheduling, failures, messaging, service-to-service HTTP and durable storage so race conditions and partial failures
 become reproducible instead of probabilistic.
 
-> Repository version: `2.1.1`. Runtime packages and tests target **net10.0 only**.
+> Repository version: `2.2.0`. Runtime packages and tests target **net10.0 only**.
 > Causalia 2.0 completes the Verification Platform as DS-26, unifying the deterministic engines from 1.0 through 1.9.
 
 <a id="overview-why-causalia"></a>

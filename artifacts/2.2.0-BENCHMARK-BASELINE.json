@@ -1,0 +1,10 @@
+{
+  "version": "2.2.0",
+  "runtime": ".NET 10.0.11, Release, Linux x64",
+  "method": "100 warmup runs, then 1000 sequential scenarios, three independent process runs; GC total allocated bytes approximate",
+  "results": [
+    { "scenario": "empty-simulation", "microsecondsPerScenario": [9.7267, 8.102, 8.9837], "allocatedBytesPerScenario": [3576, 3575, 3577] },
+    { "scenario": "servicebus-send-receive-complete", "microsecondsPerScenario": [23.0978, 24.8855, 25.6423], "allocatedBytesPerScenario": [7136, 7139, 7136] }
+  ],
+  "limitations": "Process scheduling and GC affect timings. This measures simulation overhead, not production broker latency or throughput."
+}
