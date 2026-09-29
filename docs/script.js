@@ -2,6 +2,7 @@ const scenarios={
 ack:{invariant:"The order is applied at most once",description:"The durable write succeeds, its acknowledgement is lost, and retry must not repeat the business effect.",schedules:"128",token:"CAUSALIA:ACK-7F2A-91C",hero:["Order received","Storage commit succeeds","Acknowledgement disappears","Retry duplicates the effect"],heroNote:"injected ambiguity",events:[["Order handler starts","attempt 1 enters the controlled boundary"],["Storage commit succeeds","durable state is now visible"],["Commit acknowledgement is lost","caller observes an ambiguous failure"],["Retry repeats business effect","invariant violated: observed count = 2"]]},
 duplicate:{invariant:"A message changes business state only once",description:"The broker redelivers the same logical message. The handler must recognize the duplicate without losing legitimate work.",schedules:"64",token:"CAUSALIA:DUP-22B4-E10",hero:["Message delivered","Handler completes","Broker redelivers","Duplicate effect detected"],heroNote:"at-least-once delivery",events:[["Message delivery #1","handler begins processing"],["Business effect committed","first delivery completes"],["Same message is redelivered","broker retries after missing acknowledgement"],["Second effect attempted","invariant violated: duplicate business change"]]},
 race:{invariant:"Only one writer wins the state transition",description:"Two workers load the same version and race to save competing updates. The loser must not silently overwrite the winner.",schedules:"312",token:"CAUSALIA:RACE-4D18-B72",hero:["Two workers load v7","Worker A saves v8","Worker B still holds v7","Lost update exposed"],heroNote:"competing schedule",events:[["Workers A and B load version 7","both observe the same starting state"],["Worker A saves version 8","first compare-and-swap wins"],["Worker B resumes with version 7","stale write reaches persistence"],["Worker B overwrites state","invariant violated: lost update"]]},
+servicebus:{invariant:"One logical message changes the order once",description:"A PeekLock expires before settlement. A second delivery has the same payload and a higher delivery count; the handler must be idempotent.",schedules:"virtual",token:"ILLUSTRATION:BUS-LOCK-1",hero:["Order delivered", "Handler commits", "Lock expires", "Redelivery count = 2"],heroNote:"virtual lock expiry",events:[["Receive delivery #1","broker grants a lock; DeliveryCount = 1"],["Business state commits","side effect is durable"],["Virtual lock expires","no successful Complete was recorded"],["Receive delivery #2","same message; DeliveryCount = 2"],["Idempotency check","handler must avoid a second business effect"]]},
 crash:{invariant:"Recovery resumes without repeating completed work",description:"The process crashes after durable progress but before the workflow checkpoint. Restart must continue from evidence, not from hope.",schedules:"96",token:"CAUSALIA:CRASH-8A04-C31",hero:["Operation starts","External effect completes","Process crashes","Restart repeats effect"],heroNote:"lifecycle fault",events:[["Operation begins","workflow enters a controlled lifecycle"],["External effect completes","downstream side effect is durable"],["Process crashes before checkpoint","in-memory progress disappears"],["Restart repeats external effect","invariant violated after recovery"]]}
 };
 
@@ -20,7 +21,7 @@ e2e:{kicker:"END-TO-END TESTS",title:"Prove the assembled system works across re
 
 const codeSamples={
 inspect:{title:"terminal · adoption CLI",noteTitle:"Start without changing production code.",noteBody:"The CLI ranks likely simulation boundaries and points out useful seams such as TimeProvider and propagated cancellation.",link:"https://github.com/pjotrcasteel/Causalia#five-minute-start",code:`# Install the adoption CLI
-dotnet tool install --global Causalia.Tool --version 2.1.1
+dotnet tool install --global Causalia.Tool --version 2.3.0
 
 # Inspect without changing the solution
 dotnet causalia inspect MyService.slnx
@@ -29,7 +30,57 @@ dotnet causalia inspect MyService.slnx
 dotnet causalia inspect MyService.slnx --format json
 
 # Generate the first deterministic test project
-dotnet causalia init MyService.slnx`},
+dotnet causalia generate MyService.slnx --project src/Orders/Orders.csproj
+
+# Run the generated tests, then connect your handler to the TODOs
+dotnet test tests/Orders.Causalia.Tests/Orders.Causalia.Tests.csproj`},
+generate:{title:"terminal · inspect → generate → test",noteTitle:"Useful scaffolding without invented business behavior.",noteBody:"Generation discovers known boundaries and creates compiling tests. Connect the real handler and replace TODOs with your business invariant. Output paths depend on project layout.",link:"https://github.com/pjotrcasteel/Causalia#five-minute-start",code:`dotnet tool install --global Causalia.Tool --version 2.3.0
+
+dotnet causalia inspect MyService.slnx --format json
+dotnet causalia generate MyService.slnx --project src/Orders/Orders.csproj
+
+# The command prints the generated project path.
+# Replace the TODO application entry point and domain assertion,
+# then run dotnet test against that generated .csproj.`},
+servicebus:{title:"C# · PeekLock and redelivery",noteTitle:"Virtual time drives the lock; delivery count is observable.",noteBody:"The queue, settlement and lock expiry are simulation-local. Wire a real application handler at the marked boundary. A successful Complete removes the message even when its acknowledgement is lost.",link:"https://github.com/pjotrcasteel/Causalia/blob/main/SCENARIOS.md#scenario-servicebus",code:`// Inside Simulation.RunAsync(async context => { ... }, cancellationToken)
+var bus = context.CreateAzureServiceBus();
+bus.CreateQueue("orders", TimeSpan.FromSeconds(2));
+await bus.SendAsync("orders", payload, null, context.CancellationToken);
+
+var first = (await bus.ReceiveAsync("orders", context.CancellationToken))!;
+// TODO: invoke your order handler with first.Body.
+// No Complete: the lock is allowed to expire.
+await Task.Delay(TimeSpan.FromSeconds(3), context.TimeProvider,
+    context.CancellationToken);
+
+var retry = (await bus.ReceiveAsync("orders", context.CancellationToken))!;
+if (retry.DeliveryCount != 2)
+    throw new InvalidOperationException("Expected redelivery");
+// TODO: assert the business effect still happened only once.
+await bus.CompleteAsync("orders", retry, context.CancellationToken);`},
+fault:{title:"C# · typed settlement fault",noteTitle:"Choose a broker event and a concrete outcome.",noteBody:"The rule uses the shared fault injector. Reject prevents settlement and can lead to redelivery after lock expiry; LoseAcknowledgement means settlement committed and the message is gone.",link:"https://github.com/pjotrcasteel/Causalia/blob/main/SCENARIOS.md#scenario-servicebus",code:`var plan = new FaultPlan<ServiceBusSettlementEvent,
+    ServiceBusSettlementFault>();
+plan.On<ServiceBusSettlementEvent>("reject-first-complete")
+    .Where(e => e.Action == ServiceBusSettlementAction.Complete)
+    .Once()
+    .Apply(_ => ServiceBusSettlementFault.Reject);
+
+var bus = context.CreateAzureServiceBus(plan);
+bus.CreateQueue("orders", TimeSpan.FromSeconds(2));
+// TODO: send, receive and run your application handler.
+// Assert that a later delivery does not duplicate durable work.`},
+replay:{title:"C# · replay and minimize",noteTitle:"Preserve the failing execution as evidence.",noteBody:"The failure carries a schedule and recorded faults. Minimize keeps the faults necessary for the failure; ReproduceAsync reruns that reduced case. The example mirrors the repository's replay tests.",link:"https://github.com/pjotrcasteel/Causalia/blob/main/tests/Causalia.Ecosystem.Tests/AzureServiceBusReplayTests.cs",code:`var options = new SimulationOptions { Seed = 2200 };
+var failure = await Assert.ThrowsExactlyAsync<SimulationFailedException>(
+    () => Simulation.RunAsync(options, ScenarioAsync, cancellationToken));
+
+var reduced = await Simulation.MinimizeAsync(
+    options, new MinimizationOptions { MaxAttempts = 100 },
+    failure, ScenarioAsync, cancellationToken);
+
+await Assert.ThrowsExactlyAsync<SimulationFailedException>(
+    () => Simulation.ReproduceAsync(options, reduced.Reproduction,
+        ScenarioAsync, cancellationToken));
+// ScenarioAsync is your deterministic application scenario.`},
 test:{title:"C# · first simulation",noteTitle:"Keep the invariant close to the behavior.",noteBody:"Use normal .NET seams where possible. Causalia belongs at the simulation boundary rather than leaking through your application.",link:"https://github.com/pjotrcasteel/Causalia#first-simulation",code:`[TestMethod]
 public async Task OperationShouldHappenOnce()
 {
@@ -55,8 +106,8 @@ public async Task OperationShouldHappenOnce()
         TimeSpan.FromMilliseconds(10),
         result.VirtualElapsed);
 }`},
-reqnroll:{title:"Reqnroll · scenario integration",noteTitle:"Use deterministic context inside executable specifications.",noteBody:"Causalia.Reqnroll provides scenario-scoped simulation plumbing so behavior-level scenarios can exercise deterministic timing and failure semantics.",link:"https://github.com/pjotrcasteel/Causalia/blob/main/SCENARIOS.md",code:`dotnet add package Causalia --version 2.1.1
-dotnet add package Causalia.Reqnroll --version 2.1.1
+reqnroll:{title:"Reqnroll · scenario integration",noteTitle:"Use deterministic context inside executable specifications.",noteBody:"Causalia.Reqnroll provides scenario-scoped simulation plumbing so behavior-level scenarios can exercise deterministic timing and failure semantics.",link:"https://github.com/pjotrcasteel/Causalia/blob/main/SCENARIOS.md",code:`dotnet add package Causalia --version 2.3.0
+dotnet add package Causalia.Reqnroll --version 2.3.0
 
 # Keep the feature focused on behavior.
 # Use the scenario-scoped provider from bindings
@@ -65,7 +116,7 @@ dotnet add package Causalia.Reqnroll --version 2.1.1
 };
 
 const agentSteps={
-inspect:{kicker:"STEP 01 · INSPECT",title:"Start with the solution, not with a guessed fix.",body:"Run the Causalia CLI in JSON mode so an agent can work from structured findings: likely boundaries, deterministic seams and risky APIs.",code:"dotnet causalia inspect MyService.slnx --format json",guardrail:"Inspection is a lead, not proof. The agent should understand the business invariant before editing production code."},
+inspect:{kicker:"STEP 01 · INSPECT",title:"Start with the solution, not with a guessed fix.",body:"Run the Causalia CLI in JSON mode so an agent can work from structured findings: likely boundaries, deterministic seams and risky APIs.",code:"dotnet causalia inspect MyService.slnx --format json\ndotnet causalia generate MyService.slnx --project src/Orders/Orders.csproj",guardrail:"Inspection is a lead, not proof. The agent should understand the business invariant before editing production code."},
 model:{kicker:"STEP 02 · MODEL",title:"Shrink the problem to one boundary and one guarantee.",body:"Pick a real symptom — retry, redelivery, restart, race — and express the invariant the system must preserve.",code:'context.Invariant("operation happens once", () => observedEffects <= 1);',guardrail:"Avoid simulating the entire application. A narrow boundary produces clearer evidence and lower adoption cost."},
 explore:{kicker:"STEP 03 · EXPLORE",title:"Let deterministic scheduling find the inconvenient execution.",body:"Drive virtual time and modeled failures under a controlled scheduler instead of hoping the test runner hits the same race twice.",code:"var result = await Simulation.RunAsync(..., cancellationToken);",guardrail:"Modeled failure semantics must match the risk you are investigating. Exploration is only as meaningful as the boundary model."},
 patch:{kicker:"STEP 04 · PATCH",title:"Change production behavior from evidence, not from speculation.",body:"Use the reduced failure sequence to make the smallest code change that restores the invariant.",code:"// apply the smallest evidence-backed fix",guardrail:"Do not optimize for a single green run. Preserve the failure reproduction before making the change."},
@@ -85,10 +136,10 @@ document.querySelectorAll("[data-hero-scenario]").forEach(button=>button.addEven
 document.querySelectorAll("[data-audience]").forEach(button=>button.addEventListener("click",()=>{activateButtons("[data-audience]",button);const data=audienceContent[button.dataset.audience];byId("audience-kicker").textContent=data.kicker;byId("audience-title").textContent=data.title;byId("audience-body").textContent=data.body;byId("audience-points").innerHTML=data.points.map(point=>`<li>${point}</li>`).join("")}));
 
 let selectedScenario="ack";let runTimer=null;
-function updateScrubber(step){if(!byId("trace-scrubber"))return;const value=Number(step);byId("trace-scrubber").value=String(value);byId("scrubber-value").textContent=`step ${value} / 4`;document.querySelectorAll("[data-lab-step]").forEach(row=>row.classList.toggle("visible",Number(row.dataset.labStep)<=value))}
+function updateScrubber(step){if(!byId("trace-scrubber"))return;const value=Number(step);const events=scenarios[selectedScenario].events;byId("trace-scrubber").value=String(value);byId("trace-scrubber").max=String(events.length);byId("scrubber-value").textContent=`step ${value} / ${events.length}`;document.querySelectorAll("[data-lab-step]").forEach(row=>row.classList.toggle("visible",Number(row.dataset.labStep)<=value));if(byId("lab-step-title")){byId("lab-step-title").textContent=value?events[value-1][0]:"Select a scenario and run it";byId("lab-step-detail").textContent=value?events[value-1][1]:"Move the slider to inspect each operation and the guarantee it challenges."}}
 function renderLabEvents(key){if(!byId("lab-events"))return;const scenario=scenarios[key];byId("lab-events").innerHTML=scenario.events.map((event,index)=>`<div class="lab-event ${index===scenario.events.length-1?"failure":""}" data-lab-step="${index+1}"><span class="number">${String(index+1).padStart(2,"0")}</span><i></i><div><strong>${event[0]}</strong><small>${event[1]}</small></div></div>`).join("");updateScrubber(0)}
 document.querySelectorAll("[data-scenario]").forEach(button=>button.addEventListener("click",()=>{selectedScenario=button.dataset.scenario;window.clearInterval(runTimer);activateButtons("[data-scenario]",button);const scenario=scenarios[selectedScenario];byId("lab-invariant").textContent=scenario.invariant;byId("lab-description").textContent=scenario.description;byId("lab-result-title").textContent="Ready to explore";byId("lab-state").textContent="idle";byId("lab-state").className="state-pill idle";byId("lab-token").textContent="—";renderLabEvents(selectedScenario)}));
-if(byId("run-lab"))byId("run-lab").addEventListener("click",()=>{window.clearInterval(runTimer);const scenario=scenarios[selectedScenario];const state=byId("lab-state");state.textContent="running";state.className="state-pill running";byId("lab-result-title").textContent=`Exploring ${scenario.schedules} schedules…`;byId("lab-token").textContent="—";updateScrubber(0);let step=0;runTimer=window.setInterval(()=>{step+=1;updateScrubber(step);if(step>=4){window.clearInterval(runTimer);state.textContent="failure found";state.className="state-pill failed";byId("lab-result-title").textContent="Invariant violated on a replayable path";byId("lab-token").textContent=scenario.token}},420)});
+if(byId("run-lab"))byId("run-lab").addEventListener("click",()=>{window.clearInterval(runTimer);const scenario=scenarios[selectedScenario];const state=byId("lab-state");state.textContent="running";state.className="state-pill running";byId("lab-result-title").textContent=`Exploring ${scenario.schedules} schedules…`;byId("lab-token").textContent="—";updateScrubber(0);let step=0;runTimer=window.setInterval(()=>{step+=1;updateScrubber(step);if(step>=scenario.events.length){window.clearInterval(runTimer);state.textContent="failure found";state.className="state-pill failed";byId("lab-result-title").textContent="Invariant violated on a replayable path";byId("lab-token").textContent=scenario.token}},420)});
 if(byId("trace-scrubber"))byId("trace-scrubber").addEventListener("input",event=>{window.clearInterval(runTimer);updateScrubber(event.target.value)});
 if(byId("copy-token"))byId("copy-token").addEventListener("click",event=>{const value=byId("lab-token").textContent;if(value!=="—")copyText(value,event.currentTarget,"Copy")});
 
@@ -101,7 +152,7 @@ function renderCode(key){if(!byId("code-example"))return;const sample=codeSample
 document.querySelectorAll("[data-code]").forEach(button=>button.addEventListener("click",()=>{activateButtons("[data-code]",button);renderCode(button.dataset.code)}));
 if(byId("copy-code"))byId("copy-code").addEventListener("click",event=>copyText(byId("code-example").textContent,event.currentTarget,"Copy"));
 
-function renderInstall(){if(!byId("install-output"))return;const selected=["Causalia",...Array.from(document.querySelectorAll(".package-choice input:checked:not(:disabled)")).map(input=>input.value)];byId("install-output").textContent=selected.map(name=>`dotnet add package ${name} --version 2.1.1`).join("\n");document.querySelectorAll(".package-choice").forEach(label=>{const input=label.querySelector("input");label.classList.toggle("selected",input.checked)})}
+function renderInstall(){if(!byId("install-output"))return;const selected=["Causalia",...Array.from(document.querySelectorAll(".package-choice input:checked:not(:disabled)")).map(input=>input.value)];byId("install-output").textContent=selected.map(name=>`dotnet add package ${name} --version 2.3.0`).join("\n");document.querySelectorAll(".package-choice").forEach(label=>{const input=label.querySelector("input");label.classList.toggle("selected",input.checked)})}
 document.querySelectorAll(".package-choice input:not(:disabled)").forEach(input=>input.addEventListener("change",renderInstall));
 if(byId("copy-install"))byId("copy-install").addEventListener("click",event=>copyText(byId("install-output").textContent,event.currentTarget,"Copy all"));
 

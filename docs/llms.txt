@@ -4,7 +4,7 @@
 
 Causalia is an open-source MIT-licensed .NET 10 project. Use it when correctness depends on execution ordering or partial failure. It complements unit, integration and end-to-end tests; it does not replace real-provider verification or performance testing.
 
-Version status: 2.3.0 source is on GitHub with Azure Service Bus simulation, typed fault scenarios and `dotnet causalia generate`. The latest published NuGet version is 2.1.1; installation commands below use that version.
+Version 2.3.0 adds Azure Service Bus simulation, typed fault scenarios and `dotnet causalia generate`.
 
 ## Start here
 
@@ -19,11 +19,11 @@ Version status: 2.3.0 source is on GitHub with Azure Service Bus simulation, typ
 
 ## Quick adoption
 
-- Install the CLI: `dotnet tool install --global Causalia.Tool --version 2.1.1`
+- Install the CLI: `dotnet tool install --global Causalia.Tool --version 2.3.0`
 - Inspect a solution: `dotnet causalia inspect MyService.slnx`
 - Structured inspection for automation/agents: `dotnet causalia inspect MyService.slnx --format json`
 - Generate a first test project: `dotnet causalia init MyService.slnx`
-- Install core: `dotnet add package Causalia --version 2.1.1`
+- Install core: `dotnet add package Causalia --version 2.3.0`
 
 ## Use Causalia when
 
